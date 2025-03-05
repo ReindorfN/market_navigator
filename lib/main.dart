@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,13 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: "Page 1",
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text("HomePage"),
-            backgroundColor: Colors.blueAccent,
-          ),
-          drawer: const NavigationDrawer(),
-        ),
+        home: const HomeScreen(),
       );
 }
 
@@ -56,6 +51,24 @@ class NavigationDrawer extends StatelessWidget {
               title: const Text("Search"),
               onTap: () {},
             ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text("Notifications"),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite_outline),
+              title: const Text("Favourites"),
+              onTap: () {},
+            ),
+            const Divider(
+              color: Colors.lightBlue,
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Profile"),
+              onTap: () {},
+            )
           ],
         ),
       );
