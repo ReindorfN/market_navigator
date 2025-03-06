@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'Screens/profile.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,7 +45,12 @@ class NavigationDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home),
               title: const Text("Home"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.search),
@@ -67,7 +73,13 @@ class NavigationDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text("Profile"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileScreen()),
+                );
+              },
             )
           ],
         ),
