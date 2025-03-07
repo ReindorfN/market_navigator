@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:market_navigator/Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 
@@ -78,6 +79,17 @@ class NavigationDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Settings"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
                 );
               },
             )
