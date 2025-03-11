@@ -54,11 +54,6 @@ class NavigationDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text("Search"),
-              onTap: () {},
-            ),
-            ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text("Notifications"),
               onTap: () {},
