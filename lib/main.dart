@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:market_navigator/Screens/settings.dart';
+import  'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 
