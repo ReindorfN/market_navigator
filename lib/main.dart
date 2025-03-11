@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import  'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
-
+import 'Screens/landing.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: "Page 1",
-        home: const HomeScreen(),
+        home: const LandingPage(),
       );
 }
 
