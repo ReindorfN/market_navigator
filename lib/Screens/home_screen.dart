@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// import 'package:market_navigator/Screens/barcode_scan.dart';
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart
 // import 'package:market_navigator/main.dart' as mainComponent;
@@ -46,6 +47,16 @@ class HomeScreen extends StatelessWidget {
               VerticalDivider(
                 color: Colors.amber,
               ),
+
+              ElevatedButton(
+                  onPressed: () {},
+                  // {
+                  //   Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => const BarcodeScan()));
+                  // },
+                  child: const Icon(Icons.camera)),
               // Rest of your body content will go here
               const Expanded(child: Center(child: Text('Content goes here'))),
             ],
