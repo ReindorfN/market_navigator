@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import  'Screens/settings.dart';
+import 'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 import 'Screens/landing.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -13,7 +14,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: "Page 1",
-        home: const LandingPage(),
+        initialRoute:
+            '/', // This tells Flutter which route to show first when app starts
+        routes: {
+          '/': (context) =>
+              const LandingPage(), // Root route '/' maps to LandingPage
+          '/home': (context) =>
+              const HomeScreen(), // '/home' route maps to HomeScreen
+        },
       );
 }
 

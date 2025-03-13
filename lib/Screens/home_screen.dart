@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:market_navigator/Screens/barcode_scan.dart';
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart
 // import 'package:market_navigator/main.dart' as mainComponent;
