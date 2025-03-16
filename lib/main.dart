@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'Screens/settings.dart';
+import  'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 import 'Screens/landing.dart';
-
 void main() {
   runApp(const MyApp());
 }
