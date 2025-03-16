@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OnboardingScreen(),
-    );
-  }
-}
+import 'home_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final PageController _controller = PageController();
@@ -85,7 +70,13 @@ class OnboardingPage extends StatelessWidget {
         ),
         const SizedBox(height: 30),
         ElevatedButton(
-          onPressed: () {},
+          //This navigates to the homescreen
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.purple,
             shape: RoundedRectangleBorder(
