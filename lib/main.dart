@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
+import 'Screens/settings.dart';
+import 'screens/home_screen.dart';
+import 'Screens/profile.dart';
+import 'Screens/landing.dart';
+
+void main() {
+  runApp(const MyApp());
+}
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
 
   @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: "Page 1",
+        home: const LandingPage(),
+      );
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
@@ -18,8 +30,7 @@ class LandingPage extends StatelessWidget {
           OnboardingPage(
             imagePath: 'assets/image2.png',
             title: "The abundance of variety will make you happy!",
-            description:
-                "We have both a lot of variety and a lot of brands!",
+            description: "We have both a lot of variety and a lot of brands!",
           ),
           OnboardingPage(
             imagePath: 'assets/image3.png',
@@ -52,11 +63,16 @@ class OnboardingPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(imagePath, height: 300), // Ensure images are in assets folder
+          Image.asset(imagePath,
+              height: 300), // Ensure images are in assets folder
           const SizedBox(height: 20),
-          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          Text(description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+          Text(description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () {
