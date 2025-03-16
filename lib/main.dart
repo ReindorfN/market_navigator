@@ -1,102 +1,74 @@
 import 'package:flutter/material.dart';
-import 'Screens/settings.dart';
-import 'screens/home_screen.dart';
-import 'Screens/profile.dart';
-import 'Screens/landing.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LandingPage extends StatelessWidget {
+  const LandingPage({super.key});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: "Page 1",
-        initialRoute:
-            '/', // This tells Flutter which route to show first when app starts
-        routes: {
-          '/': (context) =>
-              const LandingPage(), // Root route '/' maps to LandingPage
-          '/home': (context) =>
-              const HomeScreen(), // '/home' route maps to HomeScreen
-        },
-      );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        scrollDirection: Axis.horizontal, // Enables horizontal scrolling
+        children: const [
+          OnboardingPage(
+            imagePath: 'assets/image1.png',
+            title: "No more going to the store!",
+            description:
+                "Own the desired product in seconds by viewing it from the app!",
+          ),
+          OnboardingPage(
+            imagePath: 'assets/image2.png',
+            title: "The abundance of variety will make you happy!",
+            description:
+                "We have both a lot of variety and a lot of brands!",
+          ),
+          OnboardingPage(
+            imagePath: 'assets/image3.png',
+            title: "Fast and secure payments!",
+            description:
+                "Your payments are processed with top-notch security measures.",
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({super.key});
+class OnboardingPage extends StatelessWidget {
+  final String imagePath;
+  final String title;
+  final String description;
+
+  const OnboardingPage({
+    super.key,
+    required this.imagePath,
+    required this.title,
+    required this.description,
+  });
 
   @override
-  Widget build(BuildContext context) => Drawer(
-        child: SingleChildScrollView(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            buildHeader(context),
-            buildMenuItems(context),
-          ],
-        )),
-      );
-
-  Widget buildHeader(BuildContext context) => Container(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-        ),
-      );
-
-  Widget buildMenuItems(BuildContext context) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Wrap(
-          runSpacing: 16,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text("Home"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text("Notifications"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite_outline),
-              title: const Text("Favourites"),
-              onTap: () {},
-            ),
-            const Divider(
-              color: Colors.lightBlue,
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text("Profile"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ProfileScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()),
-                );
-              },
-            )
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(imagePath, height: 300), // Ensure images are in assets folder
+          const SizedBox(height: 20),
+          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Text(description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 30),
+          ElevatedButton(
+            onPressed: () {
+              if (title == "Fast and secure payments!") {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+            child: const Text("Next"),
+          ),
+        ],
+      ),
+    );
+  }
 }
