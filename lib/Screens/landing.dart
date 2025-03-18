@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OnboardingScreen(),
-    );
-  }
-}
+import 'home_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final PageController _controller = PageController();
@@ -28,7 +13,8 @@ class OnboardingScreen extends StatelessWidget {
           OnboardingPage(
             image: 'assets/image1.png',
             title: 'No more going to the store!',
-            description: 'Own the desired product in seconds by viewing it from the app!',
+            description:
+                'Own the desired product in seconds by viewing it from the app!',
           ),
           OnboardingPage(
             image: 'assets/image2.png',
@@ -38,7 +24,8 @@ class OnboardingScreen extends StatelessWidget {
           OnboardingPage(
             image: 'assets/image3.png',
             title: 'Fast and Secure Delivery!',
-            description: 'Get your orders delivered quickly and securely to your doorstep!',
+            description:
+                'Get your orders delivered quickly and securely to your doorstep!',
           ),
         ],
       ),
@@ -83,7 +70,13 @@ class OnboardingPage extends StatelessWidget {
         ),
         const SizedBox(height: 30),
         ElevatedButton(
-          onPressed: () {},
+          //This navigates to the homescreen
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.purple,
             shape: RoundedRectangleBorder(
@@ -91,7 +84,8 @@ class OnboardingPage extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
           ),
-          child: const Text('Next', style: TextStyle(fontSize: 18, color: Colors.white)),
+          child: const Text('Next',
+              style: TextStyle(fontSize: 18, color: Colors.white)),
         ),
       ],
     );
