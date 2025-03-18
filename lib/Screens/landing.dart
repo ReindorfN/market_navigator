@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:market_navigator/Screens/home_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-void main() {
-  runApp(MyApp());
-}
+// void main() {
+//   runApp(MyApp());
+// }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OnboardingScreen(),
-    );
-  }
-}
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: OnboardingScreen(),
+//     );
+//   }
+// }
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -40,12 +41,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               OnboardingPage(
                 image: 'lib/images/pexels-olly-972804.jpg',
                 title: 'No more going to the store!',
-                description: 'Own the desired product in seconds by viewing it from the app!',
+                description:
+                    'Own the desired product in seconds by viewing it from the app!',
               ),
               OnboardingPage(
                 image: 'assets/image2.png',
                 title: 'The abundance of variety will make you happy!',
-                description: 'We have both a lot of variety and a lot of brands!',
+                description:
+                    'We have both a lot of variety and a lot of brands!',
               ),
             ],
           ),
@@ -59,7 +62,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    
                     SizedBox(height: 8),
                     SmoothPageIndicator(
                       controller: _controller,
@@ -79,16 +81,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     backgroundColor: Colors.purple,
-                    padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   ),
                   onPressed: () {
                     if (isLastPage) {
-                      // Navigate to home or main app
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomeScreen()),
+                      );
                     } else {
-                      _controller.nextPage(duration: Duration(milliseconds: 500), curve: Curves.ease);
+                      _controller.nextPage(
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease);
                     }
                   },
-                  child: Text('Next', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: Text('Next',
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
             ),
@@ -104,7 +114,8 @@ class OnboardingPage extends StatelessWidget {
   final String title;
   final String description;
 
-  OnboardingPage({required this.image, required this.title, required this.description});
+  OnboardingPage(
+      {required this.image, required this.title, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -126,9 +137,12 @@ class OnboardingPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 SizedBox(height: 10),
-                Text(description, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                Text(description,
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600])),
               ],
             ),
           ),
