@@ -2,20 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:market_navigator/Screens/home_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: OnboardingScreen(),
-//     );
-//   }
-// }
-
 class OnboardingScreen extends StatefulWidget {
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();

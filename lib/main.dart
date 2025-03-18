@@ -3,6 +3,7 @@ import 'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 import 'Screens/landing.dart';
+import 'Screens/notifications.dart';
 
 void main() {
   runApp(const MyApp());
@@ -74,7 +75,12 @@ class NavigationDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text("Notifications"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.favorite_outline),
