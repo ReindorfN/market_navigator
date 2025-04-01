@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/shop_card.dart';
 import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
+import 'search_screen.dart';
 
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart
@@ -26,6 +27,16 @@ class HomeScreen extends StatelessWidget {
 
                 //Search bar
                 child: TextField(
+                  readOnly: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SearchScreen(searchQuery: ''),
+                      ),
+                    );
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search...',
                     prefixIcon: const Icon(Icons.search),
@@ -100,47 +111,59 @@ class HomeScreen extends StatelessWidget {
                       crossAxisCount: 3,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 2.5,
+                      childAspectRatio:
+                          0.8, // Adjusted to accommodate vertical layout
                       children: const [
                         CategoryCard(
                           icon: Icons.shopping_basket,
                           label: 'Groceries',
+                          isVertical:
+                              true, // New property to indicate vertical layout
                         ),
                         CategoryCard(
                           icon: Icons.devices,
                           label: 'Electronics',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.checkroom,
                           label: 'Fashion',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.sports_basketball,
                           label: 'Sports',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.home,
                           label: 'Home & Living',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.health_and_safety,
                           label: 'Health & Beauty',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.book,
                           label: 'Books',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.toys,
                           label: 'Toys',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.restaurant,
                           label: 'Food',
+                          isVertical: true,
                         ),
                         CategoryCard(
                           icon: Icons.pets,
                           label: 'Pet Supplies',
+                          isVertical: true,
                         ),
                       ],
                     ),
