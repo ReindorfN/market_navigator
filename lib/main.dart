@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
 import 'Screens/landing.dart';
 import 'Screens/notifications.dart';
+import 'Screens/seller_dashboard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -109,6 +110,17 @@ class NavigationDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const SettingsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text("Admin Dashboard"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SellerDashboard()),
                 );
               },
             )
