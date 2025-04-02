@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:market_navigator/Screens/products_page.dart';
 import 'Screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'Screens/profile.dart';
@@ -121,6 +122,16 @@ class NavigationDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const SellerDashboard()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text("Products"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProductPage()),
                 );
               },
             )
