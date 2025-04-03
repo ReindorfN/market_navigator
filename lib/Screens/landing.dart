@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:market_navigator/Screens/home_screen.dart';
+import 'package:market_navigator/Screens/login.dart';
+import 'package:market_navigator/Screens/signup_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -74,8 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     if (isLastPage) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()),
+                        MaterialPageRoute(builder: (context) => SignupScreen()),
                       );
                     } else {
                       _controller.nextPage(

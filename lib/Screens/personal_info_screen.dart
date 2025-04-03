@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:market_navigator/Screens/login.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   final String email;
@@ -39,8 +39,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _dobController.text =
-            "${picked.day}/${picked.month}/${picked.year}";
+        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
   }
@@ -105,7 +104,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       const SnackBar(
                           content: Text('Account created successfully!')),
                     );
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ));
                   }
                 },
                 child: const Text('Complete Signup'),

@@ -124,16 +124,6 @@ class NavigationDrawer extends StatelessWidget {
                       builder: (context) => const SellerDashboard()),
                 );
               },
-            ),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: const Text("Products"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProductPage()),
-                );
-              },
             )
           ],
         ),

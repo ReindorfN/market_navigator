@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:market_navigator/screens/home_screen.dart';
 // import 'forgotPassword.dart'; // Import the forgot password page
 
 class LoginPage extends StatefulWidget {
@@ -97,7 +98,12 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: (){
+                    _login;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                  }, 
                   child: Text('Login'),
                 ),
               ),
