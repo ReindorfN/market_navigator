@@ -130,7 +130,7 @@ class _ProductCardState extends State<ProductCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'R${widget.price.toStringAsFixed(2)}',
+                    'GHC${widget.price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

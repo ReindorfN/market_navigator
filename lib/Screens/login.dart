@@ -98,12 +98,12 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: (){
+                  onPressed: () {
                     _login;
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     );
-                  }, 
+                  },
                   child: Text('Login'),
                 ),
               ),

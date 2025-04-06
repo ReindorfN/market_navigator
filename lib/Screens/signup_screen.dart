@@ -50,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Email Field
                       TextFormField(
                         controller: _emailController,
@@ -63,14 +63,15 @@ class _SignupScreenState extends State<SignupScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Password Field
                       TextFormField(
                         controller: _passwordController,
@@ -79,7 +80,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                             ),
                             onPressed: () {
                               setState(() {
@@ -100,7 +103,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Confirm Password Field
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -109,11 +112,14 @@ class _SignupScreenState extends State<SignupScreen> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
@@ -130,7 +136,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Terms Checkbox
                       Row(
                         children: [
@@ -142,13 +148,14 @@ class _SignupScreenState extends State<SignupScreen> {
                               });
                             },
                           ),
-                          const Text('I agree to E-Market Term & Policy.'),
+                          const Text(
+                              'I agree to Market Navigator Term & Policy.'),
                         ],
                       ),
-                      
+
                       // Spacer to push button down
                       const Expanded(child: SizedBox()),
-                      
+
                       // Next Button
                       SizedBox(
                         width: double.infinity,
