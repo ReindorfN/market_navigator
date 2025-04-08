@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'gender_screen.dart';
+import 'role_screen.dart';
+import 'login.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -154,7 +155,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       // Spacer to push button down
-                      const Expanded(child: SizedBox()),
+                      const SizedBox(height: 16),
 
                       // Next Button
                       SizedBox(
@@ -166,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => GenderScreen(
+                                        builder: (context) => RoleScreen(
                                           email: _emailController.text,
                                         ),
                                       ),
@@ -176,6 +177,25 @@ class _SignupScreenState extends State<SignupScreen> {
                               : null,
                           child: const Text('Next'),
                         ),
+                      ),
+
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Already have an account?'),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginPage(),
+                                ),
+                              );
+                            },
+                            child: const Text('Sign in'),
+                          ),
+                        ],
                       ),
                     ],
                   ),

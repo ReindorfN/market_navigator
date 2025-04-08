@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'personal_info_screen.dart';
 
-class GenderScreen extends StatefulWidget {
+class RoleScreen extends StatefulWidget {
   final String email;
 
-  const GenderScreen({super.key, required this.email});
+  const RoleScreen({super.key, required this.email});
 
   @override
-  State<GenderScreen> createState() => _GenderScreenState();
+  State<RoleScreen> createState() => _RoleScreenState();
 }
 
-class _GenderScreenState extends State<GenderScreen> {
-  String? _selectedGender;
+class _RoleScreenState extends State<RoleScreen> {
+  String? _selectedRole;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your gender'),
+        title: const Text('Prefered Role'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('What is your gender?',
-                style: TextStyle(fontSize: 16)),
+            const Text('Signup As?', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 16),
-            
+
             // Gender options in a container
             Container(
               padding: const EdgeInsets.all(16.0),
@@ -39,12 +38,12 @@ class _GenderScreenState extends State<GenderScreen> {
               child: Column(
                 children: [
                   RadioListTile<String>(
-                    title: const Text('Male'),
-                    value: 'Male',
-                    groupValue: _selectedGender,
+                    title: const Text('Seller'),
+                    value: 'seller',
+                    groupValue: _selectedRole,
                     onChanged: (value) {
                       setState(() {
-                        _selectedGender = value;
+                        _selectedRole = value;
                       });
                     },
                     contentPadding: EdgeInsets.zero,
@@ -52,25 +51,12 @@ class _GenderScreenState extends State<GenderScreen> {
                   ),
                   const Divider(height: 1),
                   RadioListTile<String>(
-                    title: const Text('Female'),
-                    value: 'Female',
-                    groupValue: _selectedGender,
+                    title: const Text('Customer'),
+                    value: 'customer',
+                    groupValue: _selectedRole,
                     onChanged: (value) {
                       setState(() {
-                        _selectedGender = value;
-                      });
-                    },
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
-                  const Divider(height: 1),
-                  RadioListTile<String>(
-                    title: const Text('Other'),
-                    value: 'Other',
-                    groupValue: _selectedGender,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedGender = value;
+                        _selectedRole = value;
                       });
                     },
                     contentPadding: EdgeInsets.zero,
@@ -79,13 +65,10 @@ class _GenderScreenState extends State<GenderScreen> {
                 ],
               ),
             ),
-            
-            const Spacer(),
+
+            const SizedBox(height: 150),
             Row(
               children: [
-                const Icon(Icons.access_time, size: 16),
-                const SizedBox(width: 4),
-                const Text('9:41'),
                 const Spacer(),
                 TextButton(
                   onPressed: () {
@@ -94,7 +77,7 @@ class _GenderScreenState extends State<GenderScreen> {
                       MaterialPageRoute(
                         builder: (context) => PersonalInfoScreen(
                           email: widget.email,
-                          gender: _selectedGender,
+                          role: _selectedRole,
                         ),
                       ),
                     );

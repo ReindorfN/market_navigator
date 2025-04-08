@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 title: 'The abundance of variety will make you happy!',
                 description:
                     'We have both a lot of variety and a lot of brands!',
-              ),
+              )
             ],
           ),
           Positioned(
@@ -73,18 +73,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   ),
                   onPressed: () {
-                    if (isLastPage) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignupScreen()),
-                      );
-                    } else {
-                      _controller.nextPage(
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.ease);
-                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupScreen()),
+                    );
                   },
-                  child: Text('Next',
+                  child: Text('Signup',
                       style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
@@ -100,9 +94,14 @@ class OnboardingPage extends StatelessWidget {
   final String image;
   final String title;
   final String description;
+  final Widget? buttons;
 
-  OnboardingPage(
-      {required this.image, required this.title, required this.description});
+  OnboardingPage({
+    required this.image,
+    required this.title,
+    required this.description,
+    this.buttons,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +129,10 @@ class OnboardingPage extends StatelessWidget {
                 SizedBox(height: 10),
                 Text(description,
                     style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                if (buttons != null) ...[
+                  SizedBox(height: 20),
+                  buttons!,
+                ],
               ],
             ),
           ),

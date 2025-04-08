@@ -6,8 +6,17 @@ import 'Screens/profile.dart';
 import 'Screens/landing.dart';
 import 'Screens/notifications.dart';
 import 'Screens/seller_dashboard.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: "https://uzoycokdrnhwmnjqqzhw.supabase.co",
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6b3ljb2tkcm5od21uanFxemh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5Nzc3MjksImV4cCI6MjA1OTU1MzcyOX0.0GbnDkvHGyd65vlZlHC8ypm3lnURtsRUX2KhED07Vw0",
+  );
+
   runApp(const MyApp());
 }
 

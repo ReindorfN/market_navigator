@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
 import 'package:market_navigator/Screens/login.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   final String email;
-  final String? gender;
+  final String? role;
 
   const PersonalInfoScreen({
     super.key,
     required this.email,
-    this.gender,
+    this.role,
   });
 
   @override
@@ -16,33 +19,8 @@ class PersonalInfoScreen extends StatefulWidget {
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _dobController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderState>();
   DateTime? _selectedDate;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _dobController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,61 +36,104 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Full Name',
-                border: OutlineInputBorder(),
+        child: FormBuilder(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FormBuilderTextField(
+                name: 'firstName',
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  FormBuilderValidators.minLength(2),
+                ]),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'Phone number',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              FormBuilderTextField(
+                name: 'lastName',
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  FormBuilderValidators.minLength(2),
+                ]),
               ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _dobController,
-              decoration: InputDecoration(
-                labelText: 'Date of birth',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.calendar_today),
-                  onPressed: () => _selectDate(context),
+              const SizedBox(height: 16),
+              FormBuilderTextField(
+                name: 'phone',
+                decoration: const InputDecoration(
+                  labelText: 'Phone number',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  FormBuilderValidators.numeric(),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              FormBuilderDateTimePicker(
+                name: 'dateOfBirth',
+                decoration: InputDecoration(
+                  labelText: 'Date of birth',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.calendar_today),
+                ),
+                inputType: InputType.date,
+                format: DateFormat('dd/MM/yyyy'),
+                initialValue: _selectedDate,
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                ]),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDate = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (_formKey.currentState?.saveAndValidate() ?? false) {
+                      final formData = _formKey.currentState!.value;
+                      // Process form data
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Account created successfully!'),
+                        ),
+                      );
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => LoginPage(),
+                      ));
+                    }
+                  },
+                  child: const Text(
+                    'Complete Signup',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
-              readOnly: true,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_nameController.text.isNotEmpty &&
-                      _phoneController.text.isNotEmpty &&
-                      _dobController.text.isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Account created successfully!')),
-                    );
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LoginPage(),
-                    ));
-                  }
-                },
-                child: const Text('Complete Signup'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
