@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:market_navigator/Screens/products_page.dart';
-import 'Screens/settings.dart';
+// import 'package:market_navigator/screens/products_page.dart';
+import 'screens/settings.dart';
 import 'screens/home_screen.dart';
-import 'Screens/profile.dart';
-import 'Screens/landing.dart';
-import 'Screens/notifications.dart';
-import 'Screens/seller_dashboard.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/profile.dart';
+import 'screens/landing.dart';
+import 'screens/notifications.dart';
+import 'screens/seller_dashboard.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: "https://uzoycokdrnhwmnjqqzhw.supabase.co",
-    anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6b3ljb2tkcm5od21uanFxemh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5Nzc3MjksImV4cCI6MjA1OTU1MzcyOX0.0GbnDkvHGyd65vlZlHC8ypm3lnURtsRUX2KhED07Vw0",
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const MyApp());
 }
 
@@ -26,26 +23,42 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: true,
-      home: OnboardingScreen(),
+      debugShowCheckedModeBanner: false, // Optional: turn off the debug banner
+      title: "Market Navigator",
+      initialRoute: '/', // Set the initial route to the onboarding screen
+      routes: {
+        '/': (context) =>
+            OnboardingScreen(), // This is your onboarding screen route
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }
 
-@override
-Widget build(BuildContext context) => MaterialApp(
-      title: "Page 1",
-      initialRoute: '/',
-      routes: {
-        '/': (context) {
-          Future.delayed(const Duration(seconds: 5), () {
-            Navigator.pushReplacementNamed(context, '/home');
-          });
-          return OnboardingScreen();
-        },
-        '/home': (context) => const HomeScreen(),
-      },
-    );
+// If you want to add a splash screen with automatic navigation,
+// use this class instead of the route definition
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Navigate after a delay
+    Future.delayed(const Duration(seconds: 5), () {
+      Navigator.pushReplacementNamed(context, '/home');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OnboardingScreen();
+  }
+}
 
 class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({super.key});

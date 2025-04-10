@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'role_screen.dart';
-import 'login.dart';
+import 'package:market_navigator/screens/login.dart';
+import 'package:market_navigator/screens/role_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _agreeToTerms = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,6 +26,63 @@ class _SignupScreenState extends State<SignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // Function to create a user with Firebase
+  Future<void> _createUser() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      print("Creating user with email: ${_emailController.text}");
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      print("User created successfully: ${credential.user?.uid}");
+      
+      // Handle success (e.g., navigate to next screen)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RoleScreen(
+            email: _emailController.text,
+          ),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Error: ${e.code}");
+      String errorMessage = 'An error occurred during signup';
+      
+      if (e.code == 'weak-password') {
+        errorMessage = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'The account already exists for that email.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'The email address is not valid.';
+      } else if (e.code == 'operation-not-allowed') {
+        errorMessage = 'Email/password accounts are not enabled.';
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      print("General Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create account: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -51,7 +110,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 24),
-
                       // Email Field
                       TextFormField(
                         controller: _emailController,
@@ -72,7 +130,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-
                       // Password Field
                       TextFormField(
                         controller: _passwordController,
@@ -104,7 +161,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-
                       // Confirm Password Field
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -137,7 +193,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-
                       // Terms Checkbox
                       Row(
                         children: [
@@ -149,36 +204,59 @@ class _SignupScreenState extends State<SignupScreen> {
                               });
                             },
                           ),
-                          const Text(
-                              'I agree to Market Navigator Term & Policy.'),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                // Show terms and conditions dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Terms & Policy'),
+                                    content: const SingleChildScrollView(
+                                      child: Text(
+                                        'Please read our terms and conditions...',
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'I agree to Market Navigator Term & Policy.',
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-
                       // Spacer to push button down
                       const SizedBox(height: 16),
-
                       // Next Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _agreeToTerms
+                          onPressed: _agreeToTerms && !_isLoading
                               ? () {
-                                  if (_formKey.currentState!.validate()) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => RoleScreen(
-                                          email: _emailController.text,
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                  print("Button pressed");
+                                  _createUser();
                                 }
                               : null,
-                          child: const Text('Next'),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Next'),
                         ),
                       ),
-
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -186,7 +264,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           const Text('Already have an account?'),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => LoginPage(),

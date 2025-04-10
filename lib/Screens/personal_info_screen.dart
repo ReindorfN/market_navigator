@@ -3,6 +3,8 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 import 'package:market_navigator/Screens/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   final String email;
@@ -21,6 +23,38 @@ class PersonalInfoScreen extends StatefulWidget {
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   DateTime? _selectedDate;
+  bool _isLoading = false;
+
+  Future<void> _saveUserToFirestore(Map<String, dynamic> formData) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      print("ERROR: No current user found. User is not authenticated.");
+      throw Exception("You must be logged in to complete registration");
+    }
+
+    print("Saving data for user: $uid");
+    print("Form data: $formData");
+
+    
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': widget.email,
+        'role': widget.role ?? 'unknown',
+        'firstName': formData['firstName'],
+        'lastName': formData['lastName'],
+        'phoneNumber': formData['phone'],
+        'dateOfBirth': formData['dateOfBirth']?.toIso8601String(),
+        'createdAt': Timestamp.now(),
+      });
+      print("User data saved successfully to Firestore!");
+    } catch (e) {
+      print("Firestore error: $e");
+      throw e; // Re-throw to be caught by the calling function
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,24 +146,83 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    if (_formKey.currentState?.saveAndValidate() ?? false) {
-                      final formData = _formKey.currentState!.value;
-                      // Process form data
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Account created successfully!'),
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          print("Complete Signup button pressed");
+                          if (_formKey.currentState?.saveAndValidate() ??
+                              false) {
+                            print("Form validation successful");
+                            setState(() {
+                              _isLoading = true;
+                            });
+
+                            try {
+                              final formData = _formKey.currentState!.value;
+
+                              // First check if user is authenticated
+                              final currentUser =
+                                  FirebaseAuth.instance.currentUser;
+                              if (currentUser == null) {
+                                print("User is not authenticated.");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'You must be logged in to complete registration')),
+                                );
+                                return;
+                              }
+
+                              // Save data to Firestore
+                              await _saveUserToFirestore(formData);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Account created successfully!'),
+                                ),
+                              );
+
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => LoginPage(),
+                                ),
+                              );
+                            } catch (e) {
+                              print("Error in signup completion: $e");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString()}'),
+                                ),
+                              );
+                            } finally {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          } else {
+                            print("Form validation failed");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Please complete all required fields correctly'),
+                              ),
+                            );
+                          }
+                        },
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Complete Signup',
+                          style: TextStyle(fontSize: 16),
                         ),
-                      );
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                      ));
-                    }
-                  },
-                  child: const Text(
-                    'Complete Signup',
-                    style: TextStyle(fontSize: 16),
-                  ),
                 ),
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication package
 import 'package:market_navigator/screens/home_screen.dart';
 import 'forgotPassword.dart'; // Import the forgot password page
 
@@ -11,6 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -19,12 +21,61 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _login() {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      // Perform login logic here (e.g., API call)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login successful!')),
-      );
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final email = _emailController.text.trim();
+        final password = _passwordController.text.trim();
+
+        // Sign in with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        // If login is successful, navigate to HomeScreen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Login successful! Welcome ${userCredential.user?.email}')),
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        // Handle specific Firebase Authentication errors
+        String errorMessage = 'Login failed';
+
+        if (e.code == 'user-not-found') {
+          errorMessage = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Incorrect password provided.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'The email address is not valid.';
+        } else if (e.code == 'user-disabled') {
+          errorMessage = 'The user account has been disabled.';
+        }
+
+        // Show error message in SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+        print("Login failed: ${e.message}");
+      } catch (e) {
+        // Handle any other errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('An unexpected error occurred: ${e.toString()}')),
+        );
+        print("Unexpected error: $e");
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -102,13 +153,11 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _login;
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
-                    );
-                  },
-                  child: Text('Login'),
+                  onPressed:
+                      _isLoading ? null : _login, // Trigger the login method
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Login'),
                 ),
               ),
             ],

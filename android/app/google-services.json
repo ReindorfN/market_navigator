@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "153351338665",
+    "project_id": "market-navigator-project-6cb06",
+    "storage_bucket": "market-navigator-project-6cb06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153351338665:android:07c87ef66294cef65847b8",
+        "android_client_info": {
+          "package_name": "com.example.market_navigator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgu4myAf6O9A64mVx2hv-WLb7huaiEx84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

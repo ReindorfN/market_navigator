@@ -17,7 +17,7 @@ class _RoleScreenState extends State<RoleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Prefered Role'),
+        title: const Text('Preferred Role'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,7 +27,7 @@ class _RoleScreenState extends State<RoleScreen> {
             const Text('Signup As?', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 16),
 
-            // Gender options in a container
+            // Role selection options in a container
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -72,6 +72,17 @@ class _RoleScreenState extends State<RoleScreen> {
                 const Spacer(),
                 TextButton(
                   onPressed: () {
+                    // Check if role is selected
+                    if (_selectedRole == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please select a role to continue.'),
+                        ),
+                      );
+                      return; // Don't navigate if role is not selected
+                    }
+
+                    // Navigate to PersonalInfoScreen with selected role
                     Navigator.push(
                       context,
                       MaterialPageRoute(

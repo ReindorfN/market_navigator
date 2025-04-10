@@ -1,0 +1,2 @@
+C:/Users/al200/Downloads/market_navigator/android/app/.cxx/Debug/1g1r1u1g/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/al200/Downloads/market_navigator/android/app/.cxx/Debug/1g1r1u1g/armeabi-v7a/CMakeFiles/rebuild_cache.dir
