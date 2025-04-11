@@ -3,11 +3,10 @@ import '../widgets/shop_card.dart';
 import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
-import '../services/home_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart
-// import 'package:market_navigator/main.dart' as mainComponent;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
