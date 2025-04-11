@@ -31,6 +31,14 @@ class _LoginPageState extends State<LoginPage> {
         final email = _emailController.text.trim();
         final password = _passwordController.text.trim();
 
+        // Ensure email and password are not empty
+        if (email.isEmpty || password.isEmpty) {
+          throw FirebaseAuthException(
+            code: 'invalid-credential',
+            message: 'Email and password cannot be empty.',
+          );
+        }
+
         // Sign in with Firebase Authentication
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
@@ -46,20 +54,23 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } on FirebaseAuthException catch (e) {
-        // Handle specific Firebase Authentication errors
-        String errorMessage = 'Login failed';
+        print("FirebaseAuthException code: ${e.code}"); // Debug print
+        String errorMessage = 'Login failed. Please try again.';
 
-        if (e.code == 'user-not-found') {
-          errorMessage = 'No user found for that email.';
+        if (e.code == 'invalid-credential') {
+          errorMessage = 'Please check your email and/or password.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage =
+              'The email address is invalid. Please check the format.';
+        } else if (e.code == 'user-not-found') {
+          errorMessage =
+              'No user found for that email. Please check your email address.';
         } else if (e.code == 'wrong-password') {
           errorMessage = 'Incorrect password provided.';
-        } else if (e.code == 'invalid-email') {
-          errorMessage = 'The email address is not valid.';
         } else if (e.code == 'user-disabled') {
           errorMessage = 'The user account has been disabled.';
         }
 
-        // Show error message in SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
