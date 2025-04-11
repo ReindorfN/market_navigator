@@ -3,6 +3,7 @@ import '../widgets/shop_card.dart';
 import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
+import '../services/home_services.dart';
 
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart

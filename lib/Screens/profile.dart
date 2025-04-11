@@ -51,11 +51,11 @@ class ProfileScreen extends StatelessWidget {
                 /// Username Row
                 Row(
                   children: [
-                    /// Username Label (Takes 3 parts of space)
+                    /// Name labels
                     Expanded(
                       flex: 3,
                       child: Text(
-                        'Username:',
+                        'First Name:',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -66,7 +66,42 @@ class ProfileScreen extends StatelessWidget {
                     Expanded(
                       flex: 5,
                       child: Text(
-                        'johndoe123',
+                        'John',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                    /// Edit Icon (Pencil)
+                    IconButton(
+                      icon:
+                          const Icon(Icons.edit, size: 18, color: Colors.blue),
+                      onPressed: () {
+                        // Handle editing action here
+                        // print('Edit user Clicked');
+                      },
+                    ),
+                  ],
+                ),
+
+                //lsatname
+                Row(
+                  children: [
+                    ///
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        'Last Name:',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        'Doe',
                         style: Theme.of(context).textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -172,7 +207,7 @@ class ProfileScreen extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: Text(
-                        'Gender:',
+                        'Role: ',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -183,7 +218,7 @@ class ProfileScreen extends StatelessWidget {
                     Expanded(
                       flex: 5,
                       child: Text(
-                        'Male',
+                        'Seller',
                         style: Theme.of(context).textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
