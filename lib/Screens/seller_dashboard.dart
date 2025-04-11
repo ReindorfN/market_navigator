@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -19,6 +22,23 @@ class _SellerDashboardState extends State<SellerDashboard> {
   final _shopAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+
+  final List<String> _categories = [
+    'Groceries',
+    'Electronics',
+    'Fashion',
+    'Sports',
+    'Home & Living',
+    'Health & Beauty',
+    'Books',
+    'Toys',
+    'Food',
+    'Pet Supplies'
+  ];
+  String? _selectedCategory;
+  XFile? _pickedImage;
+  final ImagePicker _picker = ImagePicker();
+  // File? _pickedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +250,31 @@ class _SellerDashboardState extends State<SellerDashboard> {
                 ],
               ),
               const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                items: _categories.map((category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _selectedCategory = value),
+                decoration: const InputDecoration(
+                  labelText: 'Select Category',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: _showImagePickerOptions,
+                icon: const Icon(Icons.image),
+                label: const Text('Upload Image'),
+              ),
+              if (_pickedImage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Image.file(File(_pickedImage!.path), height: 100),
+                ),
               ElevatedButton(
                 onPressed: () {
                   // TODO: Implement product addition
@@ -314,6 +359,59 @@ class _SellerDashboardState extends State<SellerDashboard> {
       ),
     );
   }
+
+  Future<void> _showImagePickerOptions() {
+    return showModalBottomSheet(
+      context: context,
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Pick from Gallery'),
+              onTap: () async {
+                Navigator.pop(context); // Close the modal
+                final permissionStatus = await Permission.photos.request();
+                if (permissionStatus.isGranted) {
+                  final pickedFile = await ImagePicker()
+                      .pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() => _pickedImage = pickedFile);
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Gallery permission denied')),
+                  );
+                }
+              }),
+          ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a Photo'),
+              onTap: () async {
+                Navigator.pop(context); // Close the modal
+                final permissionStatus = await Permission.camera.request();
+                if (permissionStatus.isGranted) {
+                  final pickedFile =
+                      await ImagePicker().pickImage(source: ImageSource.camera);
+                  if (pickedFile != null) {
+                    setState(() => _pickedImage = pickedFile);
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Camera permission denied')),
+                  );
+                }
+              }),
+        ],
+      ),
+    );
+  }
+
+  // Future<void> _pickImage(ImageSource source) async {
+  //   final picked = await _picker.pickImage(source: source);
+  //   if (picked != null) {
+  //     setState(() => _pickedImage = picked);
+  //   }
+  // }
 
   @override
   void dispose() {
