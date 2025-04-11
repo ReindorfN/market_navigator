@@ -22,6 +22,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Seller Dashboard'),
@@ -39,6 +41,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                   '24',
                   Icons.inventory,
                   Colors.blue,
+                  isDark,
                 ),
                 const SizedBox(width: 16),
                 _buildStatCard(
@@ -46,6 +49,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                   'R2,450',
                   Icons.attach_money,
                   Colors.green,
+                  isDark,
                 ),
               ],
             ),
@@ -60,6 +64,9 @@ class _SellerDashboardState extends State<SellerDashboard> {
                     icon: const Icon(Icons.add_box),
                     label: const Text('Add New Product'),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? Colors.grey[850]
+                          : null, // Gray background in dark mode
                       padding: const EdgeInsets.all(16),
                     ),
                   ),
@@ -71,6 +78,9 @@ class _SellerDashboardState extends State<SellerDashboard> {
                     icon: const Icon(Icons.edit),
                     label: const Text('Update Profile'),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? Colors.grey[850]
+                          : null, // Gray background in dark mode
                       padding: const EdgeInsets.all(16),
                     ),
                   ),
@@ -88,7 +98,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildRecentActivityList(),
+            _buildRecentActivityList(isDark),
           ],
         ),
       ),
@@ -96,9 +106,10 @@ class _SellerDashboardState extends State<SellerDashboard> {
   }
 
   Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
+      String title, String value, IconData icon, Color color, bool isDark) {
     return Expanded(
       child: Card(
+        color: isDark ? Colors.grey[850] : Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -107,15 +118,16 @@ class _SellerDashboardState extends State<SellerDashboard> {
               const SizedBox(height: 8),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
                 ),
               ),
             ],
@@ -125,8 +137,9 @@ class _SellerDashboardState extends State<SellerDashboard> {
     );
   }
 
-  Widget _buildRecentActivityList() {
+  Widget _buildRecentActivityList(bool isDark) {
     return Card(
+      color: isDark ? Colors.grey[850] : Colors.white,
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -137,9 +150,14 @@ class _SellerDashboardState extends State<SellerDashboard> {
             leading: const CircleAvatar(
               child: Icon(Icons.shopping_bag),
             ),
-            title: Text('Activity ${index + 1}'),
-            subtitle: Text('Details about activity ${index + 1}'),
-            trailing: Text('${index + 1}h ago'),
+            title: Text('Activity ${index + 1}',
+                style: TextStyle(color: isDark ? Colors.white : Colors.black)),
+            subtitle: Text('Details about activity ${index + 1}',
+                style:
+                    TextStyle(color: isDark ? Colors.grey[300] : Colors.black)),
+            trailing: Text('${index + 1}h ago',
+                style:
+                    TextStyle(color: isDark ? Colors.grey[500] : Colors.black)),
           );
         },
       ),

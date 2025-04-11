@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication package
-import 'package:market_navigator/screens/home_screen.dart';
-import 'forgotPassword.dart'; // Import the forgot password page
+import 'home_screen.dart'; // Import the HomeScreen
+import 'forgotPassword.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -31,14 +31,6 @@ class _LoginPageState extends State<LoginPage> {
         final email = _emailController.text.trim();
         final password = _passwordController.text.trim();
 
-        // Ensure email and password are not empty
-        if (email.isEmpty || password.isEmpty) {
-          throw FirebaseAuthException(
-            code: 'invalid-credential',
-            message: 'Email and password cannot be empty.',
-          );
-        }
-
         // Sign in with Firebase Authentication
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
@@ -54,7 +46,6 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } on FirebaseAuthException catch (e) {
-        print("FirebaseAuthException code: ${e.code}"); // Debug print
         String errorMessage = 'Login failed. Please try again.';
 
         if (e.code == 'invalid-credential') {
@@ -74,14 +65,6 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
-        print("Login failed: ${e.message}");
-      } catch (e) {
-        // Handle any other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('An unexpected error occurred: ${e.toString()}')),
-        );
-        print("Unexpected error: $e");
       } finally {
         setState(() {
           _isLoading = false;
@@ -92,6 +75,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
@@ -113,7 +98,14 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
+                  labelStyle:
+                      TextStyle(color: isDark ? Colors.white : Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: isDark ? Colors.white : Colors.black),
+                  ),
                 ),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -131,8 +123,15 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
+                  labelStyle:
+                      TextStyle(color: isDark ? Colors.white : Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: isDark ? Colors.white : Colors.black),
+                  ),
                 ),
                 obscureText: true,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -148,28 +147,49 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
+                    // Navigate to ForgotPasswordPage
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ForgotPasswordPage(),
-                      ),
+                          builder: (context) => ForgotPasswordPage()),
                     );
                   },
                   child: Text(
                     'Forgot Password?',
-                    style: TextStyle(color: Colors.blue),
+                    style:
+                        TextStyle(color: isDark ? Colors.white : Colors.blue),
                   ),
                 ),
               ),
               SizedBox(height: 20),
+              // Centering the Login button and adding a shadow
               Center(
-                child: ElevatedButton(
-                  onPressed:
-                      _isLoading ? null : _login, // Trigger the login method
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Login'),
-                ),
+                child: _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _isLoading
+                            ? null
+                            : _login, // Trigger the login method
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            isDark
+                                ? Colors.grey[800]
+                                : Colors
+                                    .white, // Button color (white for light mode)
+                          ),
+                          foregroundColor: MaterialStateProperty.all(
+                            isDark ? Colors.white : Colors.black, // Text color
+                          ),
+                        ),
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white
+                                : Colors.black, // Text color
+                          ),
+                        ),
+                      ),
               ),
             ],
           ),

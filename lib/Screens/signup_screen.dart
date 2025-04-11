@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:market_navigator/screens/login.dart';
 import 'package:market_navigator/screens/role_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -28,16 +28,59 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // Function to create a user with Firebase
-  Future<void> _createUser() async {
-    if (!_formKey.currentState!.validate()) {
+  // Function to check form fields and terms checkbox
+  void _validateAndProceed() {
+    final isFormValid = _formKey.currentState?.validate() ?? false;
+    final areFieldsFilled = _emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _confirmPasswordController.text.isNotEmpty;
+
+    // Case 1: Form fields not filled, terms not checked
+    if (!areFieldsFilled && !_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Please fill in all details and agree to Terms & Policy'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
-    
+
+    // Case 2: Form fields filled, terms not checked
+    if (areFieldsFilled && !_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please agree to Terms & Policy'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Case 3: Form fields not filled, terms checked
+    if (!areFieldsFilled && _agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all details'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // If form is valid and terms are agreed, proceed with user creation
+    if (isFormValid && _agreeToTerms) {
+      _createUser();
+    }
+  }
+
+  // Function to create a user with Firebase
+  Future<void> _createUser() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       print("Creating user with email: ${_emailController.text}");
       final credential =
@@ -46,7 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
         password: _passwordController.text,
       );
       print("User created successfully: ${credential.user?.uid}");
-      
+
       // Handle success (e.g., navigate to next screen)
       Navigator.pushReplacement(
         context,
@@ -59,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
     } on FirebaseAuthException catch (e) {
       print("Firebase Auth Error: ${e.code}");
       String errorMessage = 'An error occurred during signup';
-      
+
       if (e.code == 'weak-password') {
         errorMessage = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
@@ -69,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
       } else if (e.code == 'operation-not-allowed') {
         errorMessage = 'Email/password accounts are not enabled.';
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
@@ -239,12 +282,25 @@ class _SignupScreenState extends State<SignupScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _agreeToTerms && !_isLoading
-                              ? () {
-                                  print("Button pressed");
-                                  _createUser();
-                                }
-                              : null,
+                          // Changed to always be clickable to show custom validation messages
+                          onPressed: _isLoading ? null : _validateAndProceed,
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[850]
+                                  : Colors.white,
+                            ),
+                            foregroundColor: MaterialStateProperty.all(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                            elevation: MaterialStateProperty.all(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? 0
+                                  : 5, // Shadow for light mode
+                            ),
+                          ),
                           child: _isLoading
                               ? const SizedBox(
                                   height: 20,
@@ -257,6 +313,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               : const Text('Next'),
                         ),
                       ),
+
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

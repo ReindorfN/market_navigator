@@ -14,7 +14,10 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
+      color: isDark ? Colors.grey[850] : Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -33,14 +36,15 @@ class CategoryCard extends StatelessWidget {
                     Icon(
                       icon,
                       size: 24,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
@@ -52,15 +56,16 @@ class CategoryCard extends StatelessWidget {
                     Icon(
                       icon,
                       size: 24,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

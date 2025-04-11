@@ -15,76 +15,92 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          PageView(
-            controller: _controller,
-            onPageChanged: (index) {
-              setState(() {
-                isLastPage = index == 1; // Updated to match two pages
-              });
-            },
-            children: [
-              OnboardingPage(
-                image: 'lib/images/pexels-olly-972804.jpg',
-                title: 'No more going to the store!',
-                description:
-                    'Own the desired product in seconds by viewing it from the app!',
-              ),
-              OnboardingPage(
-                image: 'assets/image2.png',
-                title: 'The abundance of variety will make you happy!',
-                description:
-                    'We have both a lot of variety and a lot of brands!',
-              )
-            ],
-          ),
-          Positioned(
-            bottom: 40,
-            left: 20,
-            right: 20,
-            child: Column(
+    // Using explicit brightness and colors to prevent dark mode influence
+    return Theme(
+      // Force light theme regardless of system settings
+      data: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            PageView(
+              controller: _controller,
+              onPageChanged: (index) {
+                setState(() {
+                  isLastPage = index == 1; // Updated to match two pages
+                });
+              },
               children: [
-                // Two Rows of Page Indicators
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(height: 8),
-                    SmoothPageIndicator(
-                      controller: _controller,
-                      count: 2,
-                      effect: ExpandingDotsEffect(
-                        activeDotColor: Colors.purple,
-                        dotHeight: 8,
-                        dotWidth: 8,
-                      ),
-                    ),
-                  ],
+                OnboardingPage(
+                  image: 'lib/images/pexels-olly-972804.jpg',
+                  title: 'No more going to the store!',
+                  description:
+                      'Own the desired product in seconds by viewing it from the app!',
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    backgroundColor: Colors.purple,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignupScreen()),
-                    );
-                  },
-                  child: Text('Signup',
-                      style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
+                OnboardingPage(
+                  image: 'assets/image2.png',
+                  title: 'The abundance of variety will make you happy!',
+                  description:
+                      'We have both a lot of variety and a lot of brands!',
+                )
               ],
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 40,
+              left: 20,
+              right: 20,
+              child: Column(
+                children: [
+                  // Two Rows of Page Indicators
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: 8),
+                      SmoothPageIndicator(
+                        controller: _controller,
+                        count: 2,
+                        effect: ExpandingDotsEffect(
+                          activeDotColor: Colors.purple,
+                          dotColor: Colors
+                              .grey.shade300, // Explicitly setting dot color
+                          dotHeight: 8,
+                          dotWidth: 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      backgroundColor: Colors.purple,
+                      foregroundColor:
+                          Colors.white, // Explicitly setting text color
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupScreen()),
+                      );
+                    },
+                    child: Text('Signup',
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -117,18 +133,36 @@ class OnboardingPage extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white, // Explicitly white background
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  spreadRadius: 0,
+                  offset: Offset(0, -3),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black, // Explicitly black text
+                  ),
+                ),
                 SizedBox(height: 10),
-                Text(description,
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600], // Explicitly grey text
+                  ),
+                ),
                 if (buttons != null) ...[
                   SizedBox(height: 20),
                   buttons!,

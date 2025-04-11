@@ -17,7 +17,10 @@ class ShopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
+      color: isDark ? Colors.grey[850] : Colors.white,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -28,17 +31,16 @@ class ShopCard extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => ShopDetailsScreen(
-                shopId: 'shop_id_here', // Pass actual shop ID
+                shopId: 'shop_id_here',
               ),
             ),
           );
         },
-        child: Container(
+        child: SizedBox(
           width: 160,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Shop Image
               ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
@@ -47,17 +49,15 @@ class ShopCard extends StatelessWidget {
                   height: 100,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  // Use a placeholder while loading
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 100,
-                      color: Colors.grey[300],
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
                       child: const Icon(Icons.store, size: 40),
                     );
                   },
                 ),
               ),
-              // Shop Details
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -65,9 +65,10 @@ class ShopCard extends StatelessWidget {
                   children: [
                     Text(
                       shopName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -75,18 +76,26 @@ class ShopCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.star, size: 16, color: Colors.amber),
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
                           rating.toString(),
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey[300] : Colors.black,
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(Icons.location_on, size: 16, color: Colors.grey),
+                        Icon(Icons.location_on,
+                            size: 16,
+                            color: isDark ? Colors.grey[400] : Colors.grey),
                         const SizedBox(width: 4),
                         Text(
                           distance,
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey[300] : Colors.black,
+                          ),
                         ),
                       ],
                     ),

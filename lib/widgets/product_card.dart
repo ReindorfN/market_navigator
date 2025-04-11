@@ -26,20 +26,20 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: () {
-        // Navigate to ProductPage when card is tapped
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ProductPage(
-              // Pass any necessary data to the ProductPage
-              // If ProductPage requires different parameters, adjust accordingly
               key: ValueKey(widget.productName),
             ),
           ),
         );
       },
       child: Card(
+        color: isDark ? Colors.grey[850] : Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -47,7 +47,6 @@ class _ProductCardState extends State<ProductCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image and Favorite Button
             Stack(
               children: [
                 ClipRRect(
@@ -61,7 +60,7 @@ class _ProductCardState extends State<ProductCard> {
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         height: 120,
-                        color: Colors.grey[200],
+                        color: isDark ? Colors.grey[700] : Colors.grey[200],
                         child: const Icon(Icons.image, size: 40),
                       );
                     },
@@ -71,7 +70,7 @@ class _ProductCardState extends State<ProductCard> {
                   top: 8,
                   right: 8,
                   child: CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: isDark ? Colors.black : Colors.white,
                     radius: 16,
                     child: IconButton(
                       icon: Icon(
@@ -83,16 +82,12 @@ class _ProductCardState extends State<ProductCard> {
                         setState(() {
                           isFavorite = !isFavorite;
                         });
-                        // Prevent the card tap from triggering when favorite button is pressed
-                        return;
                       },
                     ),
                   ),
                 ),
               ],
             ),
-
-            // Product Details
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -100,9 +95,10 @@ class _ProductCardState extends State<ProductCard> {
                 children: [
                   Text(
                     widget.productName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -114,7 +110,10 @@ class _ProductCardState extends State<ProductCard> {
                       const SizedBox(width: 4),
                       Text(
                         widget.rating.toString(),
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
                       ),
                     ],
                   ),
@@ -123,7 +122,7 @@ class _ProductCardState extends State<ProductCard> {
                     widget.shopName,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -131,10 +130,10 @@ class _ProductCardState extends State<ProductCard> {
                   const SizedBox(height: 4),
                   Text(
                     'GHC${widget.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: Colors.green[600],
                     ),
                   ),
                 ],

@@ -55,6 +55,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(title: Text('Forgot Password')),
       body: Padding(
@@ -65,7 +67,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               Text(
                 'Enter your email to receive a reset link.',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(
+                    fontSize: 18, color: isDark ? Colors.white : Colors.black),
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -73,7 +76,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
+                  labelStyle:
+                      TextStyle(color: isDark ? Colors.white : Colors.black),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: isDark ? Colors.white : Colors.black),
+                  ),
                 ),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 validator: (value) {
                   if (value == null || value.isEmpty)
                     return 'Please enter your email';
@@ -89,6 +99,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ? CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _sendResetEmail,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          isDark
+                              ? Colors.grey[800]
+                              : Colors.white, // Button color
+                        ),
+                        foregroundColor: MaterialStateProperty.all(
+                          isDark ? Colors.white : Colors.black, // Text color
+                        ),
+                      ),
                       child: Text('Send Reset Link'),
                     ),
             ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:market_navigator/screens/products_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/settings.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile.dart';
@@ -11,11 +11,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final prefs = await SharedPreferences.getInstance();
+  final isDarkMode = prefs.getBool('isDarkMode') ?? false;
+  themeNotifier.value = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+
   runApp(const MyApp());
 }
 
@@ -24,21 +30,47 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, // Optional: turn off the debug banner
-      title: "Market Navigator",
-      initialRoute: '/', // Set the initial route to the onboarding screen
-      routes: {
-        '/': (context) =>
-            OnboardingScreen(), // This is your onboarding screen route
-        '/home': (context) => const HomeScreen(),
-      },
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, mode, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "Market Navigator",
+        theme: ThemeData.light().copyWith(
+          // Define your light theme colors here
+          primaryColor: Colors.blue,
+          colorScheme: ColorScheme.light(
+            primary: Colors.blue,
+            secondary: Colors.blueAccent,
+          ),
+        ),
+        darkTheme: ThemeData.dark().copyWith(
+          // Define your dark theme colors here
+          primaryColor: Colors.blueGrey,
+          colorScheme: ColorScheme.dark(
+            primary: Colors.blueGrey,
+            secondary: Colors.blueAccent,
+          ),
+        ),
+        themeMode: mode,
+        // Add this for smooth theme transitions
+        builder: (context, child) {
+          return AnimatedTheme(
+            data: Theme.of(context),
+            duration: const Duration(milliseconds: 500), // Animation duration
+            curve: Curves.easeInOut, // Animation curve
+            child: child!,
+          );
+        },
+        initialRoute: '/',
+        routes: {
+          '/': (context) => OnboardingScreen(),
+          '/home': (context) => const HomeScreen(),
+        },
+      ),
     );
   }
 }
 
-// If you want to add a splash screen with automatic navigation,
-// use this class instead of the route definition
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -50,7 +82,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate after a delay
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.pushReplacementNamed(context, '/home');
     });
@@ -70,7 +101,7 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-  String? userRole; // 'customer' or 'seller'
+  String? userRole;
   bool isLoading = true;
 
   @override
@@ -88,7 +119,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
           .get();
 
       setState(() {
-        userRole = doc['role']; // 'customer' or 'seller'
+        userRole = doc['role'];
         isLoading = false;
       });
     }
@@ -172,8 +203,6 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 );
               },
             ),
-
-            // 🚨 Only show this if user is a "seller"
             if (userRole == 'seller') ...[
               ListTile(
                 leading: const Icon(Icons.admin_panel_settings),

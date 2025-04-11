@@ -15,6 +15,10 @@ class _RoleScreenState extends State<RoleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? Colors.grey[900] : Colors.grey[100];
+    final borderColor = isDarkMode ? Colors.grey[700]! : Colors.grey[300]!;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preferred Role'),
@@ -24,21 +28,32 @@ class _RoleScreenState extends State<RoleScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Signup As?', style: TextStyle(fontSize: 20)),
+            Text(
+              'Signup As?',
+              style: TextStyle(
+                fontSize: 20,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
             const SizedBox(height: 16),
 
-            // Role selection options in a container
+            // Role selection container
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 children: [
                   RadioListTile<String>(
-                    title: const Text('Seller'),
+                    title: Text(
+                      'Seller',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
+                    ),
                     value: 'seller',
                     groupValue: _selectedRole,
                     onChanged: (value) {
@@ -49,9 +64,17 @@ class _RoleScreenState extends State<RoleScreen> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                   ),
-                  const Divider(height: 1),
+                  Divider(
+                    height: 1,
+                    color: borderColor,
+                  ),
                   RadioListTile<String>(
-                    title: const Text('Customer'),
+                    title: Text(
+                      'Customer',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
+                    ),
                     value: 'customer',
                     groupValue: _selectedRole,
                     onChanged: (value) {
@@ -72,17 +95,14 @@ class _RoleScreenState extends State<RoleScreen> {
                 const Spacer(),
                 TextButton(
                   onPressed: () {
-                    // Check if role is selected
                     if (_selectedRole == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Please select a role to continue.'),
                         ),
                       );
-                      return; // Don't navigate if role is not selected
+                      return;
                     }
-
-                    // Navigate to PersonalInfoScreen with selected role
                     Navigator.push(
                       context,
                       MaterialPageRoute(
