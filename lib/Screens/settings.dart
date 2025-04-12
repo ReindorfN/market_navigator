@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart' as main_component;
 
@@ -12,6 +13,14 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool isDarkMode = false;
   bool notificationsEnabled = true;
+
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
+
+  bool _isPasswordVisible = false; // Toggle for password visibility
+  bool _isConfirmPasswordVisible =
+      false; // Toggle for confirm password visibility
 
   @override
   void initState() {
@@ -36,6 +45,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value ? ThemeMode.dark : ThemeMode.light;
   }
 
+  Future<void> _changePassword() async {
+    final user = _auth.currentUser;
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
+    try {
+      await user?.updatePassword(_passwordController.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password changed successfully')),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.message}')),
+      );
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final user = _auth.currentUser;
+
+    try {
+      await user?.delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted successfully')),
+      );
+      // Redirect to login page or sign out
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.message}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,10 +94,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           _buildSectionTitle("Account & Security"),
-          _buildListTile(Icons.lock, "Change Password", "", () {}),
+          _buildListTile(Icons.lock, "Change Password", "", () {
+            _showChangePasswordDialog();
+          }),
           _buildListTile(Icons.security, "Two-Factor Authentication (2FA)",
               "If supported", () {}),
-          _buildListTile(Icons.delete, "Delete Account", "", () {}),
+          _buildListTile(Icons.delete, "Delete Account", "", () {
+            _showDeleteAccountDialog();
+          }),
           const Divider(thickness: 1.5, color: Colors.grey),
           _buildSectionTitle("App Preferences"),
           _buildToggleTile(Icons.dark_mode, "Dark Mode",
@@ -103,6 +154,102 @@ class _SettingsScreenState extends State<SettingsScreen> {
       subtitle: Text(subtitle, style: TextStyle(color: Colors.grey)),
       value: value,
       onChanged: onChanged,
+    );
+  }
+
+  // Show Change Password Dialog
+  void _showChangePasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _passwordController,
+                obscureText: !_isPasswordVisible, // Toggle visibility
+                decoration: InputDecoration(
+                  labelText: 'New Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible =
+                            !_isPasswordVisible; // Toggle visibility
+                      });
+                    },
+                  ),
+                ),
+              ),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: !_isConfirmPasswordVisible, // Toggle visibility
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isConfirmPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isConfirmPasswordVisible =
+                            !_isConfirmPasswordVisible; // Toggle visibility
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _changePassword();
+                Navigator.pop(context);
+              },
+              child: const Text('Change'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show Delete Account Dialog
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _deleteAccount();
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

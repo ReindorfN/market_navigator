@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:market_navigator/Screens/home_screen.dart';
-import 'package:market_navigator/Screens/login.dart';
+// import 'package:market_navigator/Screens/home_screen.dart';
+// import 'package:market_navigator/Screens/login.dart';
 import 'package:market_navigator/Screens/signup_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -38,13 +38,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
               children: [
                 OnboardingPage(
-                  image: 'lib/images/pexels-olly-972804.jpg',
+                  image: 'assets/images/image1.png',
                   title: 'No more going to the store!',
                   description:
                       'Own the desired product in seconds by viewing it from the app!',
                 ),
                 OnboardingPage(
-                  image: 'assets/image2.png',
+                  image: 'assets/images/image2.png',
                   title: 'The abundance of variety will make you happy!',
                   description:
                       'We have both a lot of variety and a lot of brands!',
