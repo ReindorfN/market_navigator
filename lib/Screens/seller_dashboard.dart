@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:path/path.dart' as path;
+// import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -421,14 +423,27 @@ class _SellerDashboardState extends State<SellerDashboard> {
     }
 
     try {
-      // Uploading image to firebase storage
-      final fileName = path.basename(_pickedImage!.path);
-      final ref =
-          FirebaseStorage.instance.ref().child('product_images/$fileName');
-      await ref.putFile(File(_pickedImage!.path));
+      // Uploading image to Cloudinary
+      const cloudName = 'dgg2rcnqc';
+      const uploadPreset = 'ml_default';
+      final imageFile = File(_pickedImage!.path);
 
-      //Getting image url from firebase storage
-      final imageUrl = await ref.getDownloadURL();
+      final url =
+          Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = uploadPreset
+        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+      final response = await request.send();
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to upload image to Cloudinary');
+      }
+
+      final resStr = await response.stream.bytesToString();
+      final resJson = json.decode(resStr);
+      final imageUrl = resJson['secure_url'];
 
       // Uploading product details to Firestore
       await FirebaseFirestore.instance.collection('products').add({
