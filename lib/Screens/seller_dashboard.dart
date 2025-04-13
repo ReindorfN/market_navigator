@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -277,7 +282,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                 ),
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement product addition
+                  _uploadProduct();
                   Navigator.pop(context);
                 },
                 child: const Text('Add Product'),
@@ -366,6 +371,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
       builder: (context) => Wrap(
         children: [
           ListTile(
+              //Image picker local resource.
               leading: const Icon(Icons.photo_library),
               title: const Text('Pick from Gallery'),
               onTap: () async {
@@ -384,6 +390,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                 }
               }),
           ListTile(
+              //Camera local resource
               leading: const Icon(Icons.camera_alt),
               title: const Text('Take a Photo'),
               onTap: () async {
@@ -406,12 +413,70 @@ class _SellerDashboardState extends State<SellerDashboard> {
     );
   }
 
-  // Future<void> _pickImage(ImageSource source) async {
-  //   final picked = await _picker.pickImage(source: source);
-  //   if (picked != null) {
-  //     setState(() => _pickedImage = picked);
-  //   }
-  // }
+//uploaiding product
+  Future<void> _uploadProduct() async {
+    if (_pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image')),
+      );
+      return;
+    }
+
+    try {
+      // Uploading image to Cloudinary
+      const cloudName = 'dgg2rcnqc';
+      const uploadPreset = 'ml_default';
+      final imageFile = File(_pickedImage!.path);
+
+      final url =
+          Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = uploadPreset
+        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+      final response = await request.send();
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to upload image to Cloudinary');
+      }
+
+      final resStr = await response.stream.bytesToString();
+      final resJson = json.decode(resStr);
+      final imageUrl = resJson['secure_url'];
+
+      // Uploading product details to Firestore
+      await FirebaseFirestore.instance.collection('products').add({
+        'name': _productNameController.text.trim(),
+        'description': _productDescriptionController.text.trim(),
+        'price': double.tryParse(_productPriceController.text.trim()) ?? 0.0,
+        'quantity': int.tryParse(_productQuantityController.text.trim()) ?? 0,
+        'category': _selectedCategory,
+        'imageUrl': imageUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Product uploaded successfully')),
+      );
+
+      // Optionally clear the form
+      _productNameController.clear();
+      _productDescriptionController.clear();
+      _productPriceController.clear();
+      _productQuantityController.clear();
+      setState(() {
+        _selectedCategory = null;
+        _pickedImage = null;
+      });
+
+      Navigator.pop(context); // Close the modal
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
 
   @override
   void dispose() {
