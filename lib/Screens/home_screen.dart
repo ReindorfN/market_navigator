@@ -3,7 +3,7 @@ import '../widgets/shop_card.dart';
 import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../main.dart'
     as main_component; // Import NavigationDrawer from main.dart

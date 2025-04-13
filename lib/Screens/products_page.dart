@@ -9,8 +9,9 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
-  int selectedSize = 42;
-  Color selectedColor = Colors.deepPurple;
+  int selectedQuantity = 1;
+  double productPrice = 49.99;
+  String selectedCategory = 'Casual Shoes';
 
   @override
   Widget build(BuildContext context) {
@@ -103,14 +104,13 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Price, Quantity, and Category
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 20),
-                        const SizedBox(width: 4),
-                        const Text(
-                          '4.5',
-                          style: TextStyle(
-                            fontSize: 16,
+                        Text(
+                          '\$${productPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -123,9 +123,9 @@ class _ProductPageState extends State<ProductPage> {
                             color: Colors.amber,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
-                            '50% discount',
-                            style: TextStyle(
+                          child: Text(
+                            '$selectedCategory',
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -137,9 +137,9 @@ class _ProductPageState extends State<ProductPage> {
 
                     const SizedBox(height: 16),
 
-                    // Size Selection
+                    // Quantity
                     const Text(
-                      'Size',
+                      'Quantity',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -149,32 +149,14 @@ class _ProductPageState extends State<ProductPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildSizeOption(40),
-                        _buildSizeOption(41),
-                        _buildSizeOption(42),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Color Selection
-                    const Text(
-                      'Color',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _buildColorOption(Colors.deepPurple),
-                        _buildColorOption(Colors.grey),
-                        _buildColorOption(Colors.pink),
-                        _buildColorOption(Colors.orange),
-                        _buildColorOption(Colors.green),
-                        _buildColorOption(Colors.white),
+                        Text(
+                          '$selectedQuantity',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
                       ],
                     ),
 
@@ -220,72 +202,6 @@ class _ProductPageState extends State<ProductPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSizeOption(int size) {
-    final bool isSelected = selectedSize == size;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedSize = size;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.deepPurple : Colors.grey,
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            size.toString(),
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildColorOption(Color color) {
-    final bool isSelected = selectedColor == color;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedColor = color;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
-        ),
-        child: isSelected
-            ? const Icon(
-                Icons.check,
-                size: 20,
-                color: Colors.white,
-              )
-            : null,
       ),
     );
   }
