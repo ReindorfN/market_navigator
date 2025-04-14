@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 import 'map_picker_screen.dart';
 
 class SellerDashboard extends StatefulWidget {
@@ -323,38 +322,56 @@ class _SellerDashboardState extends State<SellerDashboard> {
                   controller: _shopNameController,
                   decoration: const InputDecoration(
                       labelText: 'Shop Name', border: OutlineInputBorder())),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                   controller: _shopAddressController,
                   maxLines: 2,
                   decoration: const InputDecoration(
                       labelText: 'Shop Address', border: OutlineInputBorder())),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                       labelText: 'Phone Number', border: OutlineInputBorder())),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                       labelText: 'Email', border: OutlineInputBorder())),
+              const SizedBox(height: 12),
               TextField(
                   controller: _workingHoursController,
                   decoration: const InputDecoration(
                       labelText: 'Working Hours',
                       hintText: 'e.g., Mon - Fri, 9AM - 5PM',
                       border: OutlineInputBorder())),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                   onPressed: _pickLogoImage,
                   icon: const Icon(Icons.image),
                   label: const Text('Upload Shop Logo')),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                   onPressed: _selectLocationOnMap,
                   icon: const Icon(Icons.location_pin),
                   label: const Text('Pick Shop Location')),
+              if (_selectedLocation != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Location: ${_selectedLocation!.latitude.toStringAsFixed(6)}, ${_selectedLocation!.longitude.toStringAsFixed(6)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _updateProfile,
@@ -418,32 +435,50 @@ class _SellerDashboardState extends State<SellerDashboard> {
   }
 
   Future<void> _updateProfile() async {
-    if (_shopLogo != null && _selectedLocation != null) {
-      final imageUrl = await _uploadImageToCloudinary(
-          _shopLogo!.path); // Assuming you want to upload the logo too
-      await FirebaseFirestore.instance
-          .collection('shop_info')
-          .doc('shopId')
-          .set({
+    // Validate required fields
+    if (_shopNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a shop name')));
+      return;
+    }
+
+    try {
+      // Create a data map to store profile info
+      final Map<String, dynamic> profileData = {
         'shopName': _shopNameController.text.trim(),
         'address': _shopAddressController.text.trim(),
         'phone': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
         'workingHours': _workingHoursController.text.trim(),
-        'logoUrl': imageUrl,
-        'location': {
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Add logo URL if a logo was uploaded
+      if (_shopLogo != null) {
+        final imageUrl = await _uploadImageToCloudinary(_shopLogo!.path);
+        profileData['logoUrl'] = imageUrl;
+      }
+
+      // Add location if it was selected
+      if (_selectedLocation != null) {
+        profileData['location'] = {
           'lat': _selectedLocation!.latitude,
           'lng': _selectedLocation!.longitude,
-        },
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+        };
+      }
+
+      // Upload to Firestore
+      await FirebaseFirestore.instance
+          .collection('shop_info')
+          .doc('shopId') // You might want to use a dynamic ID here
+          .set(profileData, SetOptions(merge: true));
 
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Profile updated')));
       Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Please upload logo and select location')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error updating profile: $e')));
     }
   }
 
@@ -509,13 +544,17 @@ class _SellerDashboardState extends State<SellerDashboard> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MapPickerScreen(), // A screen you'll create
+        builder: (_) => const MapPickerScreen(), // Using the MapPickerScreen
       ),
     );
 
     if (result != null && result is LatLng) {
       setState(() {
         _selectedLocation = result;
+        // Show a confirmation message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location selected successfully')),
+        );
       });
     }
   }
