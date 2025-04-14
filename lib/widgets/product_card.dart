@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../screens/products_page.dart';
+import 'dart:async';
 
 class ProductCard extends StatefulWidget {
   final String imageUrl;
@@ -27,9 +30,84 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isFavorite = false;
+  StreamSubscription<DocumentSnapshot>? _favoriteSubscription;
 
-  // Ensure this list is defined here as static if you want to access it from anywhere
-  static List<ProductCard> favoriteProducts = [];
+  @override
+  void initState() {
+    super.initState();
+    _listenToFavoriteChanges();
+  }
+
+  @override
+  void dispose() {
+    _favoriteSubscription?.cancel();
+    super.dispose();
+  }
+
+  // Listen for changes to favorite status
+  void _listenToFavoriteChanges() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final favRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .doc(widget.productName);
+
+    _favoriteSubscription = favRef.snapshots().listen((docSnapshot) {
+      if (mounted) {
+        setState(() {
+          isFavorite = docSnapshot.exists;
+        });
+      }
+    });
+  }
+
+  // Toggle the favorite status and save/remove the product from Firestore
+  void toggleFavorite() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to save favorites')),
+      );
+      return;
+    }
+
+    final favRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .doc(widget.productName);
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await favRef.delete();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.productName} removed from favorites')),
+        );
+      } else {
+        // Add to favorites
+        await favRef.set({
+          'imageUrl': widget.imageUrl,
+          'productName': widget.productName,
+          'shopName': widget.shopName,
+          'description': widget.description ?? '',
+          'price': widget.price,
+          'quantity': widget.quantity ?? 0,
+          'category': widget.category,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.productName} added to favorites')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,17 +170,7 @@ class _ProductCardState extends State<ProductCard> {
                         size: 16,
                         color: isFavorite ? Colors.red : Colors.grey,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                          if (isFavorite) {
-                            favoriteProducts.add(widget); // Add to favorites
-                          } else {
-                            favoriteProducts
-                                .remove(widget); // Remove from favorites
-                          }
-                        });
-                      },
+                      onPressed: toggleFavorite,
                     ),
                   ),
                 ),

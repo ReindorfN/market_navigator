@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
 
 void main() async {
@@ -174,16 +175,17 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 );
               },
             ),
-            // ListTile(
-            //   leading: const Icon(Icons.favorite_outline),
-            //   title: const Text("Favorites"),
-            //   onTap: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => FavoritesPage()),
-            //     );
-            //   },
-            // ),
+            ListTile(
+              leading: const Icon(Icons.favorite_outline),
+              title: const Text("Favorites"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FavoritesPage()),
+                );
+              },
+            ),
             const Divider(
               color: Colors.lightBlue,
             ),

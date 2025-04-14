@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import '../widgets/shop_card.dart';
 
 class ProductPage extends StatefulWidget {
@@ -28,6 +31,7 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   int selectedQuantity = 1;
   bool isFavorite = false;
+  StreamSubscription<DocumentSnapshot>? _favoriteSubscription;
 
   @override
   void initState() {
@@ -35,6 +39,79 @@ class _ProductPageState extends State<ProductPage> {
     // Initialize quantity if provided
     if (widget.quantity != null) {
       selectedQuantity = widget.quantity!;
+    }
+    // Listen for changes to favorite status
+    _listenToFavoriteChanges();
+  }
+
+  @override
+  void dispose() {
+    _favoriteSubscription?.cancel();
+    super.dispose();
+  }
+
+  // Listen for changes to favorite status
+  void _listenToFavoriteChanges() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final favRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .doc(widget.productName);
+
+    _favoriteSubscription = favRef.snapshots().listen((docSnapshot) {
+      if (mounted) {
+        setState(() {
+          isFavorite = docSnapshot.exists;
+        });
+      }
+    });
+  }
+
+  // Toggle the favorite status and save/remove the product from Firestore
+  void toggleFavorite() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to save favorites')),
+      );
+      return;
+    }
+
+    final favRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorites')
+        .doc(widget.productName);
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await favRef.delete();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.productName} removed from favorites')),
+        );
+      } else {
+        // Add to favorites
+        await favRef.set({
+          'imageUrl': widget.imageUrl,
+          'productName': widget.productName,
+          'shopName': widget.shopName,
+          'description': widget.description ?? '',
+          'price': widget.price,
+          'quantity': widget.quantity ?? 0,
+          'category': widget.category,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${widget.productName} added to favorites')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -71,17 +148,13 @@ class _ProductPageState extends State<ProductPage> {
                           color: isFavorite
                               ? Colors.red
                               : (isDark ? Colors.white70 : Colors.grey)),
-                      onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                        });
-                      },
+                      onPressed: toggleFavorite,
                     ),
                   ],
                 ),
               ),
 
-              // Purple indicator
+              // Rest of the UI remains the same...
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
                 height: 4,
@@ -331,7 +404,7 @@ class _ProductPageState extends State<ProductPage> {
                           return Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: ShopCard(),
+                            child: const ShopCard(),
                           );
                         },
                       ),
