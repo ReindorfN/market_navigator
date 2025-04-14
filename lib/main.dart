@@ -1,3 +1,5 @@
+// For main.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/settings.dart';
@@ -31,6 +33,15 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
 }
 
+@pragma('vm:entry-point')
+Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  // Handle the action
+  if (receivedAction.channelKey == 'basic_channel') {
+    print("Notification tapped: ${receivedAction.id}");
+    // Navigation would need to be handled differently since we're outside the context
+  }
+}
+
 Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
   print("Handling a foreground message: ${message.messageId}");
 
@@ -60,6 +71,25 @@ Future<void> initializeAwesomeNotifications() async {
   );
 }
 
+Future<void> requestNotificationPermissions() async {
+  await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    if (!isAllowed) {
+      AwesomeNotifications().requestPermissionToSendNotifications();
+    }
+  });
+}
+
+void showLocalNotification() {
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 1,
+      channelKey: 'basic_channel',
+      title: 'Test Notification',
+      body: 'This is a test notification',
+    ),
+  );
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -72,6 +102,13 @@ void main() async {
 
   // Initialize Awesome Notifications
   await initializeAwesomeNotifications();
+
+  // Request notification permissions
+  await requestNotificationPermissions();
+
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: onActionReceivedMethod,
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
@@ -231,7 +268,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FavoritesPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const FavoritesPage()),
                 );
               },
             ),
@@ -244,7 +282,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileScreen()),
                 );
               },
             ),
@@ -254,11 +293,12 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
                 );
               },
             ),
-            if (userRole == 'seller') ...[ 
+            if (userRole == 'seller') ...[
               ListTile(
                 leading: const Icon(Icons.admin_panel_settings),
                 title: const Text("Seller Dashboard"),

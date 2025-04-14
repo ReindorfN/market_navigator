@@ -1,9 +1,12 @@
+// For settings.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart' as main_component;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:market_navigator/screens/signup_screen.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,6 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadThemePreference();
+    _loadNotificationPreference();
   }
 
   Future<void> _loadThemePreference() async {
@@ -35,12 +39,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
         isDarkMode ? ThemeMode.dark : ThemeMode.light;
   }
 
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    });
+  }
+
   Future<void> _toggleDarkMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() => isDarkMode = value);
     await prefs.setBool('isDarkMode', value);
     main_component.themeNotifier.value =
         value ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  Future<void> _toggleNotifications(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => notificationsEnabled = value);
+    await prefs.setBool('notificationsEnabled', value);
+
+    if (value) {
+      main_component.requestNotificationPermissions();
+    } else {
+      // This will only disable notifications while app is running
+      AwesomeNotifications().setGlobalBadgeCounter(0);
+    }
+  }
+
+  // Test notification function
+  void _testNotification() {
+    main_component.showLocalNotification();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Test notification sent!')),
+    );
   }
 
   Future<void> _changePassword() async {
@@ -125,12 +157,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               "Light, Dark, System Default", isDarkMode, _toggleDarkMode),
           const Divider(thickness: 1.5, color: Colors.grey),
           _buildSectionTitle("Notifications & Alerts"),
-          _buildListTile(
-              Icons.local_offer, "Deal Alerts", "Price Drops, Restocks", () {}),
-          _buildListTile(Icons.store, "Store-Specific Alerts", "", () {}),
           _buildToggleTile(Icons.notifications, "Push Notifications",
-              "On/Off Toggle", notificationsEnabled, (value) {
-            setState(() => notificationsEnabled = value);
+              "On/Off Toggle", notificationsEnabled, _toggleNotifications),
+          _buildListTile(Icons.notification_add, "Test Notification",
+              "Send a test notification", () {
+            _testNotification();
           }),
         ],
       ),
