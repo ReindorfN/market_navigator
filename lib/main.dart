@@ -11,15 +11,68 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+
+  // Show a simple notification when the app is in the background
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 0,
+      channelKey: 'basic_channel',
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? 'You have a new message.',
+    ),
+  );
+}
+
+Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
+  print("Handling a foreground message: ${message.messageId}");
+
+  // Show a simple notification when the app is in the foreground
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 0,
+      channelKey: 'basic_channel',
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? 'You have a new message.',
+    ),
+  );
+}
+
+Future<void> initializeAwesomeNotifications() async {
+  await AwesomeNotifications().initialize(
+    'resource://drawable/res_app_icon',
+    [
+      NotificationChannel(
+        channelKey: 'basic_channel',
+        channelName: 'Basic notifications',
+        channelDescription: 'Notification channel for basic notifications',
+        defaultColor: Colors.blue,
+        ledColor: Colors.white,
+      ),
+    ],
+  );
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase messaging handlers
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessage.listen(_firebaseMessagingForegroundHandler);
+
+  // Initialize Awesome Notifications
+  await initializeAwesomeNotifications();
+
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
   themeNotifier.value = isDarkMode ? ThemeMode.dark : ThemeMode.light;
@@ -38,7 +91,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: "Market Navigator",
         theme: ThemeData.light().copyWith(
-          // Define your light theme colors here
           primaryColor: Colors.blue,
           colorScheme: ColorScheme.light(
             primary: Colors.blue,
@@ -46,7 +98,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
         darkTheme: ThemeData.dark().copyWith(
-          // Define your dark theme colors here
           primaryColor: Colors.blueGrey,
           colorScheme: ColorScheme.dark(
             primary: Colors.blueGrey,
@@ -54,12 +105,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         themeMode: mode,
-        // Add this for smooth theme transitions
         builder: (context, child) {
           return AnimatedTheme(
             data: Theme.of(context),
-            duration: const Duration(milliseconds: 500), // Animation duration
-            curve: Curves.easeInOut, // Animation curve
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
             child: child!,
           );
         },
@@ -181,8 +231,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const FavoritesPage()),
+                  MaterialPageRoute(builder: (context) => const FavoritesPage()),
                 );
               },
             ),
@@ -195,8 +244,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const ProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
                 );
               },
             ),
@@ -206,12 +254,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
               },
             ),
-            if (userRole == 'seller') ...[
+            if (userRole == 'seller') ...[ 
               ListTile(
                 leading: const Icon(Icons.admin_panel_settings),
                 title: const Text("Seller Dashboard"),
