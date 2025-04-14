@@ -2,7 +2,24 @@ import 'package:flutter/material.dart';
 import '../widgets/shop_card.dart';
 
 class ProductPage extends StatefulWidget {
-  const ProductPage({Key? key}) : super(key: key);
+  final String imageUrl;
+  final String productName;
+  final String shopName;
+  final String? description;
+  final double price;
+  final int? quantity;
+  final String category;
+
+  const ProductPage({
+    Key? key,
+    required this.imageUrl,
+    required this.productName,
+    required this.shopName,
+    this.description,
+    required this.price,
+    this.quantity,
+    required this.category,
+  }) : super(key: key);
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -10,12 +27,26 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   int selectedQuantity = 1;
-  double productPrice = 49.99;
-  String selectedCategory = 'Casual Shoes';
+  bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize quantity if provided
+    if (widget.quantity != null) {
+      selectedQuantity = widget.quantity!;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Check if dark mode is enabled
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Scaffold(
+      // Use theme-based background color for the scaffold
+      backgroundColor: isDark ? Colors.grey[900] : Colors.grey[100],
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -28,15 +59,23 @@ class _ProductPageState extends State<ProductPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.grey),
+                      icon: Icon(Icons.arrow_back,
+                          color: isDark ? Colors.white70 : Colors.grey),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                     ),
                     IconButton(
-                      icon:
-                          const Icon(Icons.favorite_border, color: Colors.grey),
-                      onPressed: () {},
+                      icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite
+                              ? Colors.red
+                              : (isDark ? Colors.white70 : Colors.grey)),
+                      onPressed: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -56,16 +95,28 @@ class _ProductPageState extends State<ProductPage> {
                 height: 250,
                 margin: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? Colors.grey[800] : Colors.white,
                   borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black26
+                          : Colors.grey.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Image.network(
-                    'https://placehold.co/300x200/blue/white?text=Blue+Shoe',
+                    widget.imageUrl,
                     height: 200,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.broken_image, size: 100);
+                      return Icon(Icons.broken_image,
+                          size: 100,
+                          color: isDark ? Colors.white54 : Colors.black54);
                     },
                   ),
                 ),
@@ -83,36 +134,63 @@ class _ProductPageState extends State<ProductPage> {
               // Product Title and Info
               Container(
                 padding: const EdgeInsets.all(16.0),
-                color: Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[850] : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black26
+                          : Colors.grey.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Diffenente shoes',
+                    Text(
+                      widget.productName,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'If you want casual and comfortable shoes,\nDiffenente 14 is for you!',
+                    Text(
+                      widget.description ?? 'No description available',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
                       ),
                     ),
                     const SizedBox(height: 8),
+
+                    // Shop name
+                    Text(
+                      'Shop: ${widget.shopName}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
                     // Price, Quantity, and Category
                     Row(
                       children: [
                         Text(
-                          '\$${productPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          'GHC${widget.price.toStringAsFixed(2)}',
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color:
+                                isDark ? Colors.greenAccent : Colors.green[700],
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -120,15 +198,15 @@ class _ProductPageState extends State<ProductPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.amber,
+                            color: isDark ? Colors.amber[700] : Colors.amber,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '$selectedCategory',
-                            style: const TextStyle(
+                            widget.category,
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: isDark ? Colors.black87 : Colors.black,
                             ),
                           ),
                         ),
@@ -137,68 +215,132 @@ class _ProductPageState extends State<ProductPage> {
 
                     const SizedBox(height: 16),
 
-                    // Quantity
-                    const Text(
-                      'Quantity',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
+                    // Divider for visual separation
+                    Divider(
+                        color: isDark ? Colors.grey[700] : Colors.grey[300]),
                     const SizedBox(height: 8),
+
+                    // Quantity
                     Row(
                       children: [
                         Text(
-                          '$selectedQuantity',
-                          style: const TextStyle(
-                            fontSize: 18,
+                          'Quantity Available',
+                          style: TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[800] : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$selectedQuantity',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
+                    // Add to cart button
                     SizedBox(
-                      height: 250, // Adjust height as needed
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              'Other Shops selling same product',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              itemCount: 5, // Replace with actual shop count
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
-                                  child: ShopCard(),
-                                );
-                              },
+                          elevation: isDark ? 8 : 4,
+                        ),
+                        onPressed: () {
+                          // Add to cart functionality
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Added $selectedQuantity ${widget.productName} to cart'),
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: isDark ? Colors.grey[800] : null,
                             ),
+                          );
+                        },
+                        child: const Text(
+                          'Add to Cart',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              // Other shops section
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[850] : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black26
+                          : Colors.grey.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Other Shops selling same product',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 180,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5, // Replace with actual shop count
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: ShopCard(),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
             ],
           ),
         ),

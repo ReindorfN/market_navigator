@@ -1,29 +1,33 @@
 import 'package:flutter/material.dart';
 import '../widgets/product_card.dart';
 import '../widgets/shop_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SearchScreen extends StatefulWidget {
   final String searchQuery;
 
   const SearchScreen({
     super.key,
-    required this.searchQuery,
+    required this.searchQuery, // Use 'searchQuery' here
   });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
+
 class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool isLoading = false;
+  String searchQuery = ''; // Local variable to handle search query
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // TODO: Implement actual search functionality
+    searchQuery = widget
+        .searchQuery; // Initialize searchQuery with the passed value
     _performSearch();
   }
 
@@ -31,7 +35,8 @@ class _SearchScreenState extends State<SearchScreen>
     setState(() {
       isLoading = true;
     });
-    // Simulate API call
+
+    // Simulate API call (Firestore query in this case)
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
         isLoading = false;
@@ -56,8 +61,14 @@ class _SearchScreenState extends State<SearchScreen>
             ),
           ),
           onSubmitted: (value) {
-            // TODO: Implement search functionality
+            // Update the local searchQuery when the user submits
+            setState(() {
+              searchQuery = value;
+            });
+            _performSearch();
           },
+          controller: TextEditingController(
+              text: searchQuery), // Display the search query in the text field
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -73,22 +84,48 @@ class _SearchScreenState extends State<SearchScreen>
               controller: _tabController,
               children: [
                 // Products Tab
-                GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: 6, // Replace with actual product count
-                  itemBuilder: (context, index) {
-                    return ProductCard(
-                      imageUrl: 'https://picsum.photos/200',
-                      productName: 'Product ${index + 1}',
-                      rating: 4.5,
-                      shopName: 'Shop ${index + 1}',
-                      price: 99.99,
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('products')
+                      .where('name', isGreaterThanOrEqualTo: searchQuery)
+                      .where('name', isLessThanOrEqualTo: '$searchQuery\uf8ff')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text('No products found'));
+                    }
+
+                    final products = snapshot.data!.docs;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.7,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        final data = product.data() as Map<String, dynamic>;
+
+                        return ProductCard(
+                          imageUrl:
+                              data['imageUrl'] ?? 'https://picsum.photos/200',
+                          productName: data['name'] ?? 'Unnamed Product',
+                          category: data['category'] ?? 'Uncategorized',
+                          shopName: 'MarketMall', // Placeholder shop name
+                          price: (data['price'] is num)
+                              ? data['price'].toDouble()
+                              : 0.0,
+                          description: data['description'] ?? '',
+                        );
+                      },
                     );
                   },
                 ),

@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import '../Screens/products_page.dart';
+import '../screens/products_page.dart';
 
 class ProductCard extends StatefulWidget {
   final String imageUrl;
   final String productName;
-  final double rating;
   final String shopName;
+  final String? description;
   final double price;
+  final int? quantity;
+  final String category;
 
   const ProductCard({
     super.key,
     required this.imageUrl,
     required this.productName,
-    required this.rating,
     required this.shopName,
+    this.description,
     required this.price,
+    this.quantity,
+    required this.category,
   });
 
   @override
@@ -23,6 +27,9 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isFavorite = false;
+
+  // Ensure this list is defined here as static if you want to access it from anywhere
+  static List<ProductCard> favoriteProducts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +40,14 @@ class _ProductCardState extends State<ProductCard> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ProductPage(
-              key: ValueKey(widget.productName),
+              imageUrl: widget.imageUrl,
+              productName: widget.productName,
+              shopName: widget.shopName,
+              description: widget.description ??
+                  'If you want casual and comfortable ${widget.productName},\nIt is for you!',
+              price: widget.price,
+              quantity: widget.quantity,
+              category: widget.category,
             ),
           ),
         );
@@ -81,6 +95,12 @@ class _ProductCardState extends State<ProductCard> {
                       onPressed: () {
                         setState(() {
                           isFavorite = !isFavorite;
+                          if (isFavorite) {
+                            favoriteProducts.add(widget); // Add to favorites
+                          } else {
+                            favoriteProducts
+                                .remove(widget); // Remove from favorites
+                          }
                         });
                       },
                     ),
@@ -104,18 +124,15 @@ class _ProductCardState extends State<ProductCard> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.rating.toString(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    widget.category,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: isDark ? Colors.blue[200] : Colors.blue[700],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(

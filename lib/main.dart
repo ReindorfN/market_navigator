@@ -6,6 +6,7 @@ import 'screens/profile.dart';
 import 'screens/landing.dart';
 import 'screens/notifications.dart';
 import 'screens/seller_dashboard.dart';
+import 'screens/favorites_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
@@ -173,11 +174,16 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.favorite_outline),
-              title: const Text("Favourites"),
-              onTap: () {},
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.favorite_outline),
+            //   title: const Text("Favorites"),
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => FavoritesPage()),
+            //     );
+            //   },
+            // ),
             const Divider(
               color: Colors.lightBlue,
             ),
