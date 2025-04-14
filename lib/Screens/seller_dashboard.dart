@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'map_picker_screen.dart';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -27,6 +29,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
   final _shopAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _workingHoursController = TextEditingController();
 
   final List<String> _categories = [
     'Groceries',
@@ -43,6 +46,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
   String? _selectedCategory;
   XFile? _pickedImage;
   final ImagePicker _picker = ImagePicker();
+  XFile? _shopLogo;
+  LatLng? _selectedLocation;
   // File? _pickedImage;
 
   @override
@@ -85,7 +90,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _showAddProductForm(),
+                    onPressed: _showAddProductForm,
                     icon: const Icon(Icons.add_box),
                     label: const Text('Add New Product'),
                     style: ElevatedButton.styleFrom(
@@ -99,7 +104,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _showUpdateProfileForm(),
+                    onPressed: _showUpdateProfileForm,
                     icon: const Icon(Icons.edit),
                     label: const Text('Update Profile'),
                     style: ElevatedButton.styleFrom(
@@ -190,6 +195,28 @@ class _SellerDashboardState extends State<SellerDashboard> {
   }
 
   void _showAddProductForm() {
+    _showFormModal(
+        'Add New Product',
+        _productNameController,
+        _productDescriptionController,
+        _productPriceController,
+        _productQuantityController,
+        _selectedCategory,
+        _uploadProduct);
+  }
+
+  void _showUpdateProfileForm() {
+    _showProfileModal();
+  }
+
+  Future<void> _showFormModal(
+      String title,
+      TextEditingController nameController,
+      TextEditingController descriptionController,
+      TextEditingController priceController,
+      TextEditingController quantityController,
+      String? selectedCategory,
+      Function uploadFunction) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -203,86 +230,66 @@ class _SellerDashboardState extends State<SellerDashboard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Add New Product',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               TextField(
-                controller: _productNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Product Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                      labelText: 'Product Name', border: OutlineInputBorder())),
               const SizedBox(height: 8),
               TextField(
-                controller: _productDescriptionController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: descriptionController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                      labelText: 'Description', border: OutlineInputBorder())),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _productPriceController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Price',
-                        prefixText: 'R',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            labelText: 'Price',
+                            prefixText: 'R',
+                            border: OutlineInputBorder())),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
-                      controller: _productQuantityController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Quantity',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+                        controller: quantityController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            labelText: 'Quantity',
+                            border: OutlineInputBorder())),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                value: selectedCategory,
                 items: _categories.map((category) {
                   return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
+                      value: category, child: Text(category));
                 }).toList(),
                 onChanged: (value) => setState(() => _selectedCategory = value),
                 decoration: const InputDecoration(
-                  labelText: 'Select Category',
-                  border: OutlineInputBorder(),
-                ),
+                    labelText: 'Select Category', border: OutlineInputBorder()),
               ),
               const SizedBox(height: 8),
               ElevatedButton.icon(
-                onPressed: _showImagePickerOptions,
-                icon: const Icon(Icons.image),
-                label: const Text('Upload Image'),
-              ),
+                  onPressed: _showImagePickerOptions,
+                  icon: const Icon(Icons.image),
+                  label: const Text('Upload Image')),
               if (_pickedImage != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Image.file(File(_pickedImage!.path), height: 100),
-                ),
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Image.file(File(_pickedImage!.path), height: 100)),
               ElevatedButton(
                 onPressed: () {
-                  _uploadProduct();
+                  uploadFunction();
                   Navigator.pop(context);
                 },
                 child: const Text('Add Product'),
@@ -292,9 +299,10 @@ class _SellerDashboardState extends State<SellerDashboard> {
         ),
       ),
     );
+    return;
   }
 
-  void _showUpdateProfileForm() {
+  void _showProfileModal() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -308,54 +316,48 @@ class _SellerDashboardState extends State<SellerDashboard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Update Profile',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const Text('Update Profile',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               TextField(
-                controller: _shopNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Shop Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: _shopNameController,
+                  decoration: const InputDecoration(
+                      labelText: 'Shop Name', border: OutlineInputBorder())),
               const SizedBox(height: 8),
               TextField(
-                controller: _shopAddressController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Shop Address',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: _shopAddressController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                      labelText: 'Shop Address', border: OutlineInputBorder())),
               const SizedBox(height: 8),
               TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                      labelText: 'Phone Number', border: OutlineInputBorder())),
               const SizedBox(height: 8),
               TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                      labelText: 'Email', border: OutlineInputBorder())),
+              TextField(
+                  controller: _workingHoursController,
+                  decoration: const InputDecoration(
+                      labelText: 'Working Hours',
+                      hintText: 'e.g., Mon - Fri, 9AM - 5PM',
+                      border: OutlineInputBorder())),
+              ElevatedButton.icon(
+                  onPressed: _pickLogoImage,
+                  icon: const Icon(Icons.image),
+                  label: const Text('Upload Shop Logo')),
+              ElevatedButton.icon(
+                  onPressed: _selectLocationOnMap,
+                  icon: const Icon(Icons.location_pin),
+                  label: const Text('Pick Shop Location')),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement profile update
-                  Navigator.pop(context);
-                },
+                onPressed: _updateProfile,
                 child: const Text('Update Profile'),
               ),
             ],
@@ -363,6 +365,86 @@ class _SellerDashboardState extends State<SellerDashboard> {
         ),
       ),
     );
+  }
+
+  Future<void> _uploadProduct() async {
+    if (_pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select an image')));
+      return;
+    }
+
+    try {
+      final imageUrl = await _uploadImageToCloudinary(_pickedImage!.path);
+      await FirebaseFirestore.instance.collection('products').add({
+        'name': _productNameController.text.trim(),
+        'description': _productDescriptionController.text.trim(),
+        'price': double.tryParse(_productPriceController.text.trim()) ?? 0.0,
+        'quantity': int.tryParse(_productQuantityController.text.trim()) ?? 0,
+        'category': _selectedCategory,
+        'imageUrl': imageUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product uploaded successfully')));
+      _clearProductForm();
+      Navigator.pop(context); // Close the modal
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  Future<String> _uploadImageToCloudinary(String imagePath) async {
+    const cloudName = 'dgg2rcnqc';
+    const uploadPreset = 'ml_default';
+    final imageFile = File(imagePath);
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+    final response = await request.send();
+    if (response.statusCode != 200) {
+      throw Exception('Failed to upload image to Cloudinary');
+    }
+
+    final resStr = await response.stream.bytesToString();
+    final resJson = json.decode(resStr);
+    return resJson['secure_url'];
+  }
+
+  Future<void> _updateProfile() async {
+    if (_shopLogo != null && _selectedLocation != null) {
+      final imageUrl = await _uploadImageToCloudinary(
+          _shopLogo!.path); // Assuming you want to upload the logo too
+      await FirebaseFirestore.instance
+          .collection('shop_info')
+          .doc('shopId')
+          .set({
+        'shopName': _shopNameController.text.trim(),
+        'address': _shopAddressController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'workingHours': _workingHoursController.text.trim(),
+        'logoUrl': imageUrl,
+        'location': {
+          'lat': _selectedLocation!.latitude,
+          'lng': _selectedLocation!.longitude,
+        },
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Profile updated')));
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please upload logo and select location')));
+    }
   }
 
   Future<void> _showImagePickerOptions() {
@@ -413,69 +495,40 @@ class _SellerDashboardState extends State<SellerDashboard> {
     );
   }
 
-//uploaiding product
-  Future<void> _uploadProduct() async {
-    if (_pickedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an image')),
-      );
-      return;
-    }
-
-    try {
-      // Uploading image to Cloudinary
-      const cloudName = 'dgg2rcnqc';
-      const uploadPreset = 'ml_default';
-      final imageFile = File(_pickedImage!.path);
-
-      final url =
-          Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
-
-      final request = http.MultipartRequest('POST', url)
-        ..fields['upload_preset'] = uploadPreset
-        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
-
-      final response = await request.send();
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to upload image to Cloudinary');
-      }
-
-      final resStr = await response.stream.bytesToString();
-      final resJson = json.decode(resStr);
-      final imageUrl = resJson['secure_url'];
-
-      // Uploading product details to Firestore
-      await FirebaseFirestore.instance.collection('products').add({
-        'name': _productNameController.text.trim(),
-        'description': _productDescriptionController.text.trim(),
-        'price': double.tryParse(_productPriceController.text.trim()) ?? 0.0,
-        'quantity': int.tryParse(_productQuantityController.text.trim()) ?? 0,
-        'category': _selectedCategory,
-        'imageUrl': imageUrl,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product uploaded successfully')),
-      );
-
-      // Optionally clear the form
-      _productNameController.clear();
-      _productDescriptionController.clear();
-      _productPriceController.clear();
-      _productQuantityController.clear();
+  Future<void> _pickLogoImage() async {
+    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
       setState(() {
-        _selectedCategory = null;
-        _pickedImage = null;
+        _shopLogo = pickedImage;
       });
-
-      Navigator.pop(context); // Close the modal
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
+  }
+
+  //Location picker
+  Future<void> _selectLocationOnMap() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MapPickerScreen(), // A screen you'll create
+      ),
+    );
+
+    if (result != null && result is LatLng) {
+      setState(() {
+        _selectedLocation = result;
+      });
+    }
+  }
+
+  void _clearProductForm() {
+    _productNameController.clear();
+    _productDescriptionController.clear();
+    _productPriceController.clear();
+    _productQuantityController.clear();
+    setState(() {
+      _selectedCategory = null;
+      _pickedImage = null;
+    });
   }
 
   @override
@@ -488,6 +541,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
     _shopAddressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _workingHoursController.dispose();
     super.dispose();
   }
 }
