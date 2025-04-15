@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 import 'map_picker_screen.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -15,6 +17,8 @@ class SellerDashboard extends StatefulWidget {
   @override
   State<SellerDashboard> createState() => _SellerDashboardState();
 }
+
+// In seller_dashboard.dart or wherever you handle product addition:
 
 class _SellerDashboardState extends State<SellerDashboard> {
   // Controllers for product form
@@ -48,6 +52,53 @@ class _SellerDashboardState extends State<SellerDashboard> {
   XFile? _shopLogo;
   LatLng? _selectedLocation;
   // File? _pickedImage;
+
+  Future<void> addProduct(
+      String productName, double price, String description) async {
+    try {
+      // Get current user ID
+      final user = FirebaseAuth.instance.currentUser;
+
+      // Add product to Firestore
+      final productRef =
+          await FirebaseFirestore.instance.collection('products').add({
+        'sellerId': user?.uid,
+        'name': productName,
+        'price': price,
+        'description': description,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Create notification in Firestore for persistence
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'title': 'New Product Added',
+        'body': 'A new product "$productName" has been added',
+        'timestamp': FieldValue.serverTimestamp(),
+        'productId': productRef.id,
+        'read': false,
+      });
+
+      // Show local notification
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 10,
+          channelKey: 'basic_channel',
+          title: 'New Product Added',
+          body: 'A new product "$productName" has been added',
+          payload: {'productId': productRef.id},
+        ),
+      );
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Product added successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding product: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

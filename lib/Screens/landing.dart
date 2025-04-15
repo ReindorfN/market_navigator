@@ -39,15 +39,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 OnboardingPage(
                   image: 'assets/images/image1.png',
-                  title: 'No more going to the store!',
+                  title: 'Compare prices without leaving your seat!',
                   description:
                       'Own the desired product in seconds by viewing it from the app!',
                 ),
                 OnboardingPage(
                   image: 'assets/images/image2.png',
-                  title: 'The abundance of variety will make you happy!',
+                  title: 'Know Before You Go!',
                   description:
-                      'We have both a lot of variety and a lot of brands!',
+                      'Plan your market trip by checking prices from multiple sellers before you leave your room.',
                 )
               ],
             ),

@@ -1,3 +1,5 @@
+// For main.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/settings.dart';
@@ -11,15 +13,103 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+
+  // Show a simple notification when the app is in the background
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 0,
+      channelKey: 'basic_channel',
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? 'You have a new message.',
+    ),
+  );
+}
+
+@pragma('vm:entry-point')
+Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  // Handle the action
+  if (receivedAction.channelKey == 'basic_channel') {
+    print("Notification tapped: ${receivedAction.id}");
+    // Navigation would need to be handled differently since we're outside the context
+  }
+}
+
+Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
+  print("Handling a foreground message: ${message.messageId}");
+
+  // Show a simple notification when the app is in the foreground
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 0,
+      channelKey: 'basic_channel',
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? 'You have a new message.',
+    ),
+  );
+}
+
+Future<void> initializeAwesomeNotifications() async {
+  await AwesomeNotifications().initialize(
+    'resource://drawable/res_app_icon',
+    [
+      NotificationChannel(
+        channelKey: 'basic_channel',
+        channelName: 'Basic notifications',
+        channelDescription: 'Notification channel for basic notifications',
+        defaultColor: Colors.blue,
+        ledColor: Colors.white,
+      ),
+    ],
+  );
+}
+
+Future<void> requestNotificationPermissions() async {
+  await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    if (!isAllowed) {
+      AwesomeNotifications().requestPermissionToSendNotifications();
+    }
+  });
+}
+
+void showLocalNotification() {
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 1,
+      channelKey: 'basic_channel',
+      title: 'Test Notification',
+      body: 'This is a test notification',
+    ),
+  );
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase messaging handlers
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessage.listen(_firebaseMessagingForegroundHandler);
+
+  // Initialize Awesome Notifications
+  await initializeAwesomeNotifications();
+
+  // Request notification permissions
+  await requestNotificationPermissions();
+
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: onActionReceivedMethod,
+  );
+
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
   themeNotifier.value = isDarkMode ? ThemeMode.dark : ThemeMode.light;
@@ -38,7 +128,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: "Market Navigator",
         theme: ThemeData.light().copyWith(
-          // Define your light theme colors here
           primaryColor: Colors.blue,
           colorScheme: ColorScheme.light(
             primary: Colors.blue,
@@ -46,7 +135,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
         darkTheme: ThemeData.dark().copyWith(
-          // Define your dark theme colors here
           primaryColor: Colors.blueGrey,
           colorScheme: ColorScheme.dark(
             primary: Colors.blueGrey,
@@ -54,12 +142,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         themeMode: mode,
-        // Add this for smooth theme transitions
         builder: (context, child) {
           return AnimatedTheme(
             data: Theme.of(context),
-            duration: const Duration(milliseconds: 500), // Animation duration
-            curve: Curves.easeInOut, // Animation curve
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
             child: child!,
           );
         },

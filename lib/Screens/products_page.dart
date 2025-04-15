@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../widgets/shop_card.dart';
 import '../models/shop.dart';
+import 'package:flutter/services.dart';
 
 class ProductPage extends StatefulWidget {
   final String imageUrl;
@@ -119,6 +120,11 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: const Color(0xEEF7FE), // Silver color
+      statusBarIconBrightness:
+          Brightness.dark, // Icons in dark color for contrast
+    ));
     // Check if dark mode is enabled
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
@@ -132,24 +138,25 @@ class _ProductPageState extends State<ProductPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              Container(
+                color: const Color(0xEEF7FE), // Silver background
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
                       icon: Icon(Icons.arrow_back,
-                          color: isDark ? Colors.white70 : Colors.grey),
+                          color: Colors.black), // better contrast on silver
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                     ),
                     IconButton(
                       icon: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite
-                              ? Colors.red
-                              : (isDark ? Colors.white70 : Colors.grey)),
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.black,
+                      ),
                       onPressed: toggleFavorite,
                     ),
                   ],

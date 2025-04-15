@@ -1,7 +1,12 @@
+// For settings.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart' as main_component;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:market_navigator/screens/signup_screen.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,14 +23,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _confirmPasswordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
-  bool _isPasswordVisible = false; // Toggle for password visibility
-  bool _isConfirmPasswordVisible =
-      false; // Toggle for confirm password visibility
-
   @override
   void initState() {
     super.initState();
     _loadThemePreference();
+    _loadNotificationPreference();
   }
 
   Future<void> _loadThemePreference() async {
@@ -37,12 +39,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
         isDarkMode ? ThemeMode.dark : ThemeMode.light;
   }
 
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    });
+  }
+
   Future<void> _toggleDarkMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() => isDarkMode = value);
     await prefs.setBool('isDarkMode', value);
     main_component.themeNotifier.value =
         value ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  Future<void> _toggleNotifications(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => notificationsEnabled = value);
+    await prefs.setBool('notificationsEnabled', value);
+
+    if (value) {
+      main_component.requestNotificationPermissions();
+    } else {
+      // This will only disable notifications while app is running
+      AwesomeNotifications().setGlobalBadgeCounter(0);
+    }
+  }
+
+  // Test notification function
+  void _testNotification() {
+    main_component.showLocalNotification();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Test notification sent!')),
+    );
   }
 
   Future<void> _changePassword() async {
@@ -69,16 +99,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _deleteAccount() async {
     final user = _auth.currentUser;
+    final userId = user?.uid;
 
     try {
+      // Delete user data from Firestore
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .delete();
+      }
+
+      // Delete Firebase Auth account
       await user?.delete();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account deleted successfully')),
       );
-      // Redirect to login page or sign out
+
+      // Redirect to login page after sign out
+      await FirebaseAuth.instance.signOut();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => SignupScreen()),
+        (route) => false,
+      );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
+      );
+    } on FirebaseException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Firestore Error: ${e.message}')),
       );
     }
   }
@@ -97,8 +148,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildListTile(Icons.lock, "Change Password", "", () {
             _showChangePasswordDialog();
           }),
-          _buildListTile(Icons.security, "Two-Factor Authentication (2FA)",
-              "If supported", () {}),
           _buildListTile(Icons.delete, "Delete Account", "", () {
             _showDeleteAccountDialog();
           }),
@@ -106,16 +155,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle("App Preferences"),
           _buildToggleTile(Icons.dark_mode, "Dark Mode",
               "Light, Dark, System Default", isDarkMode, _toggleDarkMode),
-          _buildListTile(Icons.currency_exchange, "Currency & Region",
-              "USD - United States", () {}),
           const Divider(thickness: 1.5, color: Colors.grey),
           _buildSectionTitle("Notifications & Alerts"),
-          _buildListTile(
-              Icons.local_offer, "Deal Alerts", "Price Drops, Restocks", () {}),
-          _buildListTile(Icons.store, "Store-Specific Alerts", "", () {}),
           _buildToggleTile(Icons.notifications, "Push Notifications",
-              "On/Off Toggle", notificationsEnabled, (value) {
-            setState(() => notificationsEnabled = value);
+              "On/Off Toggle", notificationsEnabled, _toggleNotifications),
+          _buildListTile(Icons.notification_add, "Test Notification",
+              "Send a test notification", () {
+            _testNotification();
           }),
         ],
       ),
@@ -159,70 +205,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Show Change Password Dialog
   void _showChangePasswordDialog() {
+    // Key change: Move these variables inside the dialog function so they work properly in the StatefulBuilder
+    bool isPasswordVisible = false;
+    bool isConfirmPasswordVisible = false;
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Change Password'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _passwordController,
-                obscureText: !_isPasswordVisible, // Toggle visibility
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+        // Use StatefulBuilder to manage state within the dialog
+        return StatefulBuilder(builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Change Password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _passwordController,
+                  obscureText: !isPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        // Update state within the dialog
+                        setDialogState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible =
-                            !_isPasswordVisible; // Toggle visibility
-                      });
-                    },
                   ),
                 ),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: !isConfirmPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        // Update state within the dialog
+                        setDialogState(() {
+                          isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: !_isConfirmPasswordVisible, // Toggle visibility
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isConfirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isConfirmPasswordVisible =
-                            !_isConfirmPasswordVisible; // Toggle visibility
-                      });
-                    },
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  _changePassword();
+                  Navigator.pop(context);
+                },
+                child: const Text('Change'),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _changePassword();
-                Navigator.pop(context);
-              },
-              child: const Text('Change'),
-            ),
-          ],
-        );
+          );
+        });
       },
     );
   }
@@ -241,9 +294,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Red background
+                foregroundColor: Colors.white, // White text
+              ),
               onPressed: () {
-                _deleteAccount();
                 Navigator.pop(context);
+                _deleteAccount(); // Call the existing method directly
               },
               child: const Text('Delete'),
             ),
