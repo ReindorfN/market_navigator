@@ -1,5 +1,3 @@
-// For settings.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,21 +57,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => notificationsEnabled = value);
     await prefs.setBool('notificationsEnabled', value);
 
-    if (value) {
-      main_component.requestNotificationPermissions();
-    } else {
-      // This will only disable notifications while app is running
-      AwesomeNotifications().setGlobalBadgeCounter(0);
-    }
+   
   }
 
-  // Test notification function
-  void _testNotification() {
-    main_component.showLocalNotification();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Test notification sent!')),
-    );
-  }
+ 
 
   Future<void> _changePassword() async {
     final user = _auth.currentUser;
@@ -159,10 +146,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle("Notifications & Alerts"),
           _buildToggleTile(Icons.notifications, "Push Notifications",
               "On/Off Toggle", notificationsEnabled, _toggleNotifications),
-          _buildListTile(Icons.notification_add, "Test Notification",
-              "Send a test notification", () {
-            _testNotification();
-          }),
         ],
       ),
     );
