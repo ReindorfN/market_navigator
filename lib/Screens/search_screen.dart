@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/product_card.dart';
 import '../widgets/shop_card.dart';
+import '../models/shop.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-
 class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -26,8 +26,8 @@ class _SearchScreenState extends State<SearchScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    searchQuery = widget
-        .searchQuery; // Initialize searchQuery with the passed value
+    searchQuery =
+        widget.searchQuery; // Initialize searchQuery with the passed value
     _performSearch();
   }
 
@@ -130,13 +130,46 @@ class _SearchScreenState extends State<SearchScreen>
                   },
                 ),
                 // Shops Tab
-                ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: 5, // Replace with actual shop count
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ShopCard(),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('shop_info')
+                      .where('shopName', isGreaterThanOrEqualTo: searchQuery)
+                      .where('shopName',
+                          isLessThanOrEqualTo: '$searchQuery\uf8ff')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text('No shops found'));
+                    }
+
+                    final shops = snapshot.data!.docs;
+
+                    return ListView.builder(
+                      itemCount: shops.length,
+                      itemBuilder: (context, index) {
+                        final shopData =
+                            shops[index].data() as Map<String, dynamic>;
+                        return ShopCard(
+                          shop: Shop(
+                            shopName: shopData['shopName'] ?? 'Shop Name',
+                            address: shopData['address'] ?? 'Shop Address',
+                            email: shopData['email'] ?? 'shop@example.com',
+                            logoUrl: shopData['logoUrl'] ??
+                                'https://example.com/logo.png',
+                            phoneNumber:
+                                shopData['phoneNumber'] ?? '123-456-7890',
+                            workingHours: shopData['workingHours'] is String
+                                ? {'Mon-Fri': shopData['workingHours']}
+                                : Map<String, String>.from(
+                                    shopData['workingHours'] ?? {}),
+                            latitude: shopData['latitude']?.toDouble() ?? 0.0,
+                            longitude: shopData['longitude']?.toDouble() ?? 0.0,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

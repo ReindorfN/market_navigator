@@ -252,7 +252,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                             labelText: 'Price',
-                            prefixText: 'R',
+                            prefixText: 'GHC',
                             border: OutlineInputBorder())),
                   ),
                   const SizedBox(width: 8),
@@ -470,7 +470,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
       // Upload to Firestore
       await FirebaseFirestore.instance
           .collection('shop_info')
-          .doc('shopId') // You might want to use a dynamic ID here
+          .doc('shop_info.uid')
           .set(profileData, SetOptions(merge: true));
 
       ScaffoldMessenger.of(context)

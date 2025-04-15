@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../widgets/shop_card.dart';
+import '../models/shop.dart';
 
 class ProductPage extends StatefulWidget {
   final String imageUrl;
@@ -91,7 +92,8 @@ class _ProductPageState extends State<ProductPage> {
         // Remove from favorites
         await favRef.delete();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${widget.productName} removed from favorites')),
+          SnackBar(
+              content: Text('${widget.productName} removed from favorites')),
         );
       } else {
         // Add to favorites
@@ -327,38 +329,38 @@ class _ProductPageState extends State<ProductPage> {
                     const SizedBox(height: 16),
 
                     // Add to cart button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: isDark ? 8 : 4,
-                        ),
-                        onPressed: () {
-                          // Add to cart functionality
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Added $selectedQuantity ${widget.productName} to cart'),
-                              duration: const Duration(seconds: 2),
-                              backgroundColor: isDark ? Colors.grey[800] : null,
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Add to Cart',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.deepPurple,
+                    //       foregroundColor: Colors.white,
+                    //       padding: const EdgeInsets.symmetric(vertical: 12),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //       elevation: isDark ? 8 : 4,
+                    //     ),
+                    //     onPressed: () {
+                    //       // Add to cart functionality
+                    //       ScaffoldMessenger.of(context).showSnackBar(
+                    //         SnackBar(
+                    //           content: Text(
+                    //               'Added $selectedQuantity ${widget.productName} to cart'),
+                    //           duration: const Duration(seconds: 2),
+                    //           backgroundColor: isDark ? Colors.grey[800] : null,
+                    //         ),
+                    //       );
+                    //     },
+                    //     child: const Text(
+                    //       'Add to Cart',
+                    //       style: TextStyle(
+                    //         fontSize: 16,
+                    //         fontWeight: FontWeight.bold,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -395,19 +397,56 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      height: 180,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 5, // Replace with actual shop count
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: const ShopCard(),
-                          );
-                        },
-                      ),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('shop_info')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(child: Text('No shops found'));
+                        }
+
+                        final shops = snapshot.data!.docs;
+
+                        return ListView.builder(
+                          itemCount: shops.length,
+                          itemBuilder: (context, index) {
+                            final shopData =
+                                shops[index].data() as Map<String, dynamic>;
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: ShopCard(
+                                shop: Shop(
+                                  shopName: shopData['name'] ?? 'Shop Name',
+                                  address:
+                                      shopData['address'] ?? 'Shop Address',
+                                  email:
+                                      shopData['email'] ?? 'shop@example.com',
+                                  logoUrl: shopData['logoUrl'] ??
+                                      'https://example.com/logo.png',
+                                  phoneNumber:
+                                      shopData['phoneNumber'] ?? '123-456-7890',
+                                  workingHours: shopData['workingHours']
+                                          is String
+                                      ? {'Mon-Fri': shopData['workingHours']}
+                                      : Map<String, String>.from(
+                                          shopData['workingHours'] ?? {}),
+                                  latitude:
+                                      shopData['latitude']?.toDouble() ?? 0.0,
+                                  longitude:
+                                      shopData['longitude']?.toDouble() ?? 0.0,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),

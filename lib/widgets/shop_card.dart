@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import '../Screens/shop_details_screen.dart';
+import '../models/shop.dart'; // Import the Shop model
 
 class ShopCard extends StatelessWidget {
+  final Shop shop; // Accept a Shop object
+
   const ShopCard({
     super.key,
-    this.shopName = 'Shop Name',
-    this.imageUrl = 'https://placeholder.com/300x200',
-    this.rating = 4.5,
-    this.distance = '1.2 km',
+    required this.shop,
   });
-
-  final String shopName;
-  final String imageUrl;
-  final double rating;
-  final String distance;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +26,7 @@ class ShopCard extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => ShopDetailsScreen(
-                shopId: 'shop_id_here',
+                shop: shop, // Pass the entire Shop object
               ),
             ),
           );
@@ -45,7 +40,7 @@ class ShopCard extends StatelessWidget {
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
                 child: Image.network(
-                  imageUrl,
+                  shop.logoUrl,
                   height: 100,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -64,7 +59,7 @@ class ShopCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      shopName,
+                      shop.shopName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -74,30 +69,20 @@ class ShopCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toString(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.grey[300] : Colors.black,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.location_on,
-                            size: 16,
-                            color: isDark ? Colors.grey[400] : Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          distance,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.grey[300] : Colors.black,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      shop.address,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[300] : Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Location: ${shop.latitude}, ${shop.longitude}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[300] : Colors.black,
+                      ),
                     ),
                   ],
                 ),

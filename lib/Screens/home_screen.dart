@@ -5,6 +5,7 @@ import '../widgets/product_card.dart';
 import 'search_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:market_navigator/screens/categories_page.dart';
+import '../models/shop.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../main.dart'
@@ -76,15 +77,60 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Expanded(
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        itemCount: 5, // Replace with actual shop count
-                        itemBuilder: (context, index) {
-                          return Padding(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('shop_info')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Center(child: Text('No shops found'));
+                          }
+
+                          final shops = snapshot.data!.docs;
+
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: ShopCard(),
+                            itemCount: shops.length,
+                            itemBuilder: (context, index) {
+                              final shopData =
+                                  shops[index].data() as Map<String, dynamic>;
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: ShopCard(
+                                  shop: Shop(
+                                    shopName:
+                                        shopData['shopName'] ?? 'Shop Name',
+                                    address:
+                                        shopData['address'] ?? 'Shop Address',
+                                    email:
+                                        shopData['email'] ?? 'shop@example.com',
+                                    logoUrl: shopData['logoUrl'] ??
+                                        'https://example.com/logo.png',
+                                    phoneNumber: shopData['phoneNumber'] ??
+                                        '123-456-7890',
+                                    workingHours: shopData['workingHours']
+                                            is String
+                                        ? {'Mon-Fri': shopData['workingHours']}
+                                        : Map<String, String>.from(
+                                            shopData['workingHours'] ?? {}),
+                                    latitude:
+                                        shopData['latitude']?.toDouble() ?? 0.0,
+                                    longitude:
+                                        shopData['longitude']?.toDouble() ??
+                                            0.0,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
