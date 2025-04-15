@@ -124,13 +124,13 @@ class _SellerDashboardState extends State<SellerDashboard> {
                   isDark,
                 ),
                 const SizedBox(width: 16),
-                _buildStatCard(
-                  'Total Sales',
-                  'R2,450',
-                  Icons.attach_money,
-                  Colors.green,
-                  isDark,
-                ),
+                // _buildStatCard(
+                //   'Total Sales',
+                //   'R2,450',
+                //   Icons.attach_money,
+                //   Colors.green,
+                //   isDark,
+                // ),
               ],
             ),
             const SizedBox(height: 24),
@@ -170,15 +170,15 @@ class _SellerDashboardState extends State<SellerDashboard> {
             const SizedBox(height: 24),
 
             // Recent Activity Section
-            const Text(
-              'Recent Activity',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildRecentActivityList(isDark),
+            // const Text(
+            //   'Recent Activity',
+            //   style: TextStyle(
+            //     fontSize: 20,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
+            // _buildRecentActivityList(isDark),
           ],
         ),
       ),
