@@ -23,7 +23,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                main_component.showLocalNotification();
+                // main_component.showLocalNotification();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Test notification sent!')),
                 );
